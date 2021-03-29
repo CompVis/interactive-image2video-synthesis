@@ -2750,7 +2750,7 @@
 
 		.wrapper.style3 {
 			background-attachment: fixed;
-			background-image: url("images/overlay.png"), url("../../images/banner.jpg");
+			background-image: url("images/overlay.png"), url("../../images/banner.png");
 			background-position: center center;
 			background-size: cover;
 		}
@@ -3105,7 +3105,7 @@
 	#banner {
 		padding: 8em 0 8em 0;
 		background-attachment: fixed;
-		background-image: url("images/overlay.png"), url("../../images/banner.jpg");
+		background-image: url("images/overlay.png"), url("../../images/banner.png");
 		background-position: center top;
 		background-size: cover;
 		line-height: 1.75;

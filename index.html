@@ -16,9 +16,11 @@
 
       gtag('config', 'UA-117339330-4');
     </script>
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+        <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
     <title>
-      Behavior-driven Synthesis of Human Dynamics
+      Understanding Object Dynamics for Interactive Image-To-Video-Synthesis
     </title>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -29,14 +31,14 @@
 		<!-- Banner -->
 			<section id="banner" style="background-attachment:scroll;">
         <h2>
-          Behavior-Driven Synthesis of Human Dynamics
+          Understanding Object Dynamics for Interactive Image-To-Video-Synthesis
         </h2>
         <p>
-        <a href="https://www.linkedin.com/in/andreas-blattmann-479038186/?originalSubdomain=de">Andreas Blattmann</a>&ast;, 
-        <a href="hhttps://timomilbich.github.io/">Timo Milbich</a>&ast;,
-        <a href="https://mdork.github.io/">Michael Dorkenwald</a>&ast;,
+        <a href="https://www.linkedin.com/in/andreas-blattmann-479038186/?originalSubdomain=de">Andreas Blattmann</a>,
+        <a href="hhttps://timomilbich.github.io/">Timo Milbich</a>,
+        <a href="https://mdork.github.io/">Michael Dorkenwald</a>,
         <a href="https://hci.iwr.uni-heidelberg.de/Staff/bommer">Bj&ouml;rn Ommer</a><br/>
-        <a href="https://www.iwr.uni-heidelberg.de/">HCI/IWR, Heidelberg University</a><br/>
+        <a href="https://www.iwr.uni-heidelberg.de/">Interdisciplinary Center for Scientific Computing, HCI, Heidelberg University</a><br/>
         <a href="http://cvpr2021.thecvf.com/">CVPR 2021</a><br/>
         </p>
 			</section>
@@ -55,13 +57,11 @@
                       <a href="paper/paper.pdf">
                         <img src="paper/paper.png" alt="" style="border:1px solid black"/>
                       </a>
-                      <a href="https://arxiv.org/abs/2103.04677">arXiv</a>
-                      <div class="headerDivider"></div>
-                      <a href="paper/paper.bib">BibTeX</a>
-                      <div class="headerDivider"></div>
-                      <a href="https://github.com/CompVis/behavior-driven-video-synthesis">GitHub</a>
-                      <br/>
-                      &ast; indicates equal contribution
+<!--                      <a href="https://arxiv.org/abs/2103.04677">arXiv</a>-->
+<!--                      <div class="headerDivider"></div>-->
+<!--                      <a href="paper/paper.bib">BibTeX</a>-->
+<!--                      <div class="headerDivider"></div>-->
+                      <a href="https://github.com/CompVis/interactive-image2video-synthesis">GitHub</a>
                     </div>
 
                   </div>
@@ -69,7 +69,7 @@
 							<div class="6u$ 12u$(medium)">
                 <h1>Abstract</h1>
                 <p style="text-align: justify">
-                Generating and representing human behavior are of major importance for various computer vision applications. Commonly, human video synthesis represents behavior as sequences of postures while directly predicting their likely progressions or merely changing the appearance of the depicted persons, thus not being able to exercise control over their actual behavior during the synthesis process. In contrast, controlled behavior synthesis and transfer across individuals requires a deep understanding of body dynamics and calls for a representation of behavior that is independent of appearance and also of specific postures. In this work, we present a model for human behavior synthesis which learns a dedicated representation of human dynamics independent of postures. Using this representation, we are able to change the behavior of a person depicted in an arbitrary posture, or to even directly transfer behavior observed in a given video sequence. To this end, we propose a conditional variational framework which explicitly disentangles posture from behavior. We demonstrate the effectiveness of our approach on this novel task, evaluating capturing, transferring, and sampling fine-grained, diverse behavior, both quantitatively and qualitatively.
+                What would be the effect of locally poking a static scene? We present an approach that learns naturally-looking global articulations caused by a local manipulation at a pixel level. Training requires only videos of moving objects but no information of the underlying manipulation of the physical scene. Our generative model learns to infer natural object dynamics as a response to user interaction and learns about the interrelations between different object body regions. Given a static image of an object and a local poking of a pixel, the approach then predicts how the object would deform over time. In contrast to existing work on video prediction, we do not synthesize arbitrary realistic videos but enable local interactive control of the deformation. Our model is not restricted to particular object categories and can transfer dynamics onto novel unseen object instances. Extensive experiments on diverse objects demonstrate the effectiveness of our approach compared to common video prediction frameworks.
                 </p>
 
 							</div>
@@ -95,15 +95,13 @@
                                 style="margin-bottom:2em; box-shadow:0 0;
                                 text-align:justify">
                       <img src="images/first-page.png" alt="" style="border:0px solid black"/>
-                      Our Approach for Behavior Transfer. Given a source sequence of human dynamics our model infers a behavior encoding which is independent of posture. We can re-enact the behavior by combining it with an unrelated target posture and thus control the synthesis process. The resulting sequence is combined with an appearance to synthesize a video sequence.
+                      Our approach for interactive image-to-video synthesis learns to understand the relations between the distinct body parts of articulated objects from unlabeled video data, thus enabling synthesis of videos showing natural object dynamics as responses to local interactions.
                     </div>
                     <div class="image fit captioned align-left"
                                 style="margin-bottom:2em; box-shadow:0 0;
                                 text-align:justify">
                       <img src="paper/teaser.png" alt="" style="border:0px solid black"/>
-                      During training we learn an behavior representation using a special conditional VAE which is independent of posture. Therefore, we use an auxiliary decoder to disentangle behavior from posture. 
-                      In inference, we transfer source behavior (green) to an arbitrary target posture (yellow) or synthesize novel behavior from the prior distribution which is
-						matched to q by a learned invertible transformation T (red).
+                      Left: Our framework for interactive image-to-video synthesis during training. Right: Our proposed hierarchical latent model \(\boldsymbol{\mathcal{F}}\) for synthesizing dynamics, consisting of a hierarchy of individual RNNs \(\mathcal{F}_n\), each of which operates on a different spatial feature level of the UNet defined by the pretrained encoder \(\mathcal{E}_\sigma\) and the decoder \(\mathcal{G}\). Given the initial object state \(\boldsymbol{\sigma}_0 = [\mathcal{E}_\sigma(x_0)^1,...,\mathcal{E}_\sigma(x_0)^N]\), \(\boldsymbol{\mathcal{F}}\) predicts the next state \(\boldsymbol{\hat{\sigma}}_{i+1} = [\hat{\sigma}_{i+1}^1,...,\hat{\sigma}_{i+1}^N]\) based on its current state \(\hat{\sigma}_i\) and the latent interaction \(\phi_i = \mathcal{E}_\phi(p,l)\) at the corresponding time step. The decoder \(\mathcal{G}\) finally visualizes each predicted object state \(\hat{\sigma}_i\) in an image frame \(\hat{x}_i\).
                     </div>
             <div class="row 150%">
             	</section>
@@ -111,22 +109,26 @@
           <div class="container">
             <header class="major">
               <h2>Results</h2>
-              <p>and applications of our model.</p>
+              <p>for the object categories of plants and humans.</p>
             </header>
 
-<div class="row 150%">
+
+
+<header class="minor">
+<h2>Plants</h2>
+</header>
+
+
+<div class="row 250%">
 <div class="6u 12u$(xsmall)">
-
-
-
 <div class="image fit captioned align-just">
 <div class="videocontainer">
 <video controls class="videothing">
-<source src="images/behavior_transfer1.mp4" type="video/mp4">
+<source src="images/poking_plants_1.mp4" type="video/mp4">
 Your browser does not support the video tag.
 </video>
 </div>
-Behavior Transfer 1. We transfer fine-grained, characteristic body dynamics of an observed behavior x<sub>β</sub> to unrelated, significantly different target postures x<sub>t</sub> . If required, the target posture is first adjusted by a transition phase before re-enacting the inferred behavior.
+Animating images of plants by poking a single pixel.
 </div>
 </div>
 <div class="6u$ 12u$(xsmall)">
@@ -134,11 +136,11 @@ Behavior Transfer 1. We transfer fine-grained, characteristic body dynamics of a
 <div class="image fit captioned align-just">
 <div class="videocontainer">
 <video controls class="videothing">
-<source src="images/behavior_transfer1_RGB.mp4" type="video/mp4">
+<source src="images/poking_plants_2.mp4" type="video/mp4">
 Your browser does not support the video tag.
 </video>
 </div>
-Behavior Transfer 1 RGB. We transfer fine-grained, characteristic body dynamics of an observed behavior x<sub>β</sub> to unrelated, significantly different target postures x<sub>t</sub> . If required, the target posture is first adjusted by a transition phase before re-enacting the inferred behavior. 
+Animating images of plants by poking a single pixel.
 </div>
 </div>
 </div>
@@ -150,11 +152,11 @@ Behavior Transfer 1 RGB. We transfer fine-grained, characteristic body dynamics 
 <div class="image fit captioned align-just">
 <div class="videocontainer">
 <video controls class="videothing">
-<source src="images/behavior_transfer2.mp4" type="video/mp4">
+<source src="images/poking_plants_3.mp4" type="video/mp4">
 Your browser does not support the video tag.
 </video>
 </div>
-Behavior Transfer 2. 
+Animating images of plants by poking a single pixel.
 </div>
 </div>
 <div class="6u$ 12u$(xsmall)">
@@ -162,77 +164,19 @@ Behavior Transfer 2.
 <div class="image fit captioned align-just">
 <div class="videocontainer">
 <video controls class="videothing">
-<source src="images/behavior_transfer2_RGB.mp4" type="video/mp4">
+<source src="images/poking_plants_4.mp4" type="video/mp4">
 Your browser does not support the video tag.
 </video>
 </div>
-Behavior Transfer 2 RGB. 
+Animating images of plants by poking a single pixel.
 </div>
 </div>
 </div>
 
 
-<div class="row 250%">
-<div class="6u 12u$(xsmall)">
-	
-<div class="image fit captioned align-just">
-<div class="videocontainer">
-<video controls class="videothing">
-<source src="images/samples.mp4" type="video/mp4">
-Your browser does not support the video tag.
-</video>
-</div>
-Prior Samples. We show behavior synthesis based on random sampling z<sub>β</sub> from the prior distribution
-which are then transformed using T<sub>ξ</sub> . The leftmost column
-depicts the target postures x<sub>t</sub> with each performing 6 ran-
-domly sampled behaviors. Note, that for each target posture
-x<sub>t</sub> we use different samples z<sub>β</sub>.
-</div>
-</div>
-<div class="6u$ 12u$(xsmall)">
-
-<div class="image fit captioned align-just">
-<div class="videocontainer">
-<video controls class="videothing">
-<source src="images/nearest_neighbors.mp4" type="video/mp4">
-Your browser does not support the video tag.
-</video>
-</div>
-Nearest Neighbors. To visually demonstrate that our learned representation z<sub>β</sub> actually captures
-behavior dynamics while discarding posture information,
-we find nearest neighbours to the ground-truth training se-
-quences. Therefore, we re-enact a source behavior x<sub>β</sub> us-
-ing a random target posture x<sub>t</sub>.
-</div>
-</div>
-</div>
-
-<div class="row 250%">
-<div class="6u 12u$(xsmall)">
-
-<div class="image fit captioned align-just">
-<div class="videocontainer">
-<video controls class="videothing">
-<source src="images/interpolations_01.mp4" type="video/mp4">
-Your browser does not support the video tag.
-</video>
-</div>
-Interpolation 1.
-</div>
-</div>
-<div class="6u$ 12u$(xsmall)">
-
-<div class="image fit captioned align-just">
-<div class="videocontainer">
-<video controls class="videothing">
-<source src="images/interpolations_rgb_01.mp4" type="video/mp4">
-Your browser does not support the video tag.
-</video>
-</div>
-Interpolation RGB 1.
-</div>
-</div>
-</div>
+<header class="minor">
+<h2>Humans</h2>
+</header>
 
 <div class="row 250%">
 <div class="6u 12u$(xsmall)">
@@ -240,11 +184,11 @@ Interpolation RGB 1.
 <div class="image fit captioned align-just">
 <div class="videocontainer">
 <video controls class="videothing">
-<source src="images/interpolations_02.mp4" type="video/mp4">
+<source src="images/iper_1.mp4" type="video/mp4">
 Your browser does not support the video tag.
 </video>
 </div>
-Interpolation 2.
+Animating images of humans by poking a single pixel.
 </div>
 </div>
 <div class="6u$ 12u$(xsmall)">
@@ -252,26 +196,26 @@ Interpolation 2.
 <div class="image fit captioned align-just">
 <div class="videocontainer">
 <video controls class="videothing">
-<source src="images/interpolations_rgb_02.mp4" type="video/mp4">
+<source src="images/iper_2.mp4" type="video/mp4">
 Your browser does not support the video tag.
 </video>
 </div>
-Interpolation RGB 2.
+Animating images of humans by poking a single pixel.
 </div>
 </div>
 </div>
 
 <div class="row 250%">
 <div class="6u 12u$(xsmall)">
-	
+
 <div class="image fit captioned align-just">
 <div class="videocontainer">
 <video controls class="videothing">
-<source src="images/interpolations_03.mp4" type="video/mp4">
+<source src="images/iper_3.mp4" type="video/mp4">
 Your browser does not support the video tag.
 </video>
 </div>
-Interpolation 3.
+Animating images of humans by poking a single pixel.
 </div>
 </div>
 <div class="6u$ 12u$(xsmall)">
@@ -279,37 +223,121 @@ Interpolation 3.
 <div class="image fit captioned align-just">
 <div class="videocontainer">
 <video controls class="videothing">
-<source src="images/interpolations_rgb_03.mp4" type="video/mp4">
+<source src="images/iper_4.mp4" type="video/mp4">
 Your browser does not support the video tag.
 </video>
 </div>
-Interpolation RGB 3.
+Animating images of humans by poking a single pixel.
 </div>
 </div>
 </div>
 
+<header class="minor">
+<h2>Understanding Object Structure</h2>
+</header>
 
-<div class="row 150%">
-<div class="6u 12u$(xsmall)">
 
+<div class="row 250%">
+<div class="12u$ 12u$(xsmall)">
 <div class="image fit captioned align-just">
-<a href="images/deepfashion_grid.jpg">
-<img src="images/deepfashion_grid.jpg" alt="" />
+<a href="images/object_structure.png">
+<img src="images/object_structure.png" alt="" />
 </a>
-Posture-Appearance transfer on DeepFashion. Our method can also be used to disentangle posture and appearance. A quantitative evaluation can be found Table 1 in the supplementary material.
+Understanding object structure: By performing 100 random interactions at the same location \(l\) within a given image frame \(x_0\) we obtain varying video sequences, from which we compute motion correlations for \(l\) with all remaining pixels. By mapping these correlations to the pixel space, we visualize distinct object parts.
+</div>
+</div>
+</div>
+
+
+
+
+<header class="minor">
+<h2>Additional Results for Human Dynamics</h2>
+</header>
+
+<div class="row 250%">
+<div class="6u 12u$(xsmall)">
+	
+<div class="image fit captioned align-just">
+<div class="videocontainer">
+<video controls class="videothing">
+<source src="images/taichi_1.mp4" type="video/mp4">
+Your browser does not support the video tag.
+</video>
+</div>
+Animating images of humans in the wild by poking a single pixel.
 </div>
 </div>
 <div class="6u$ 12u$(xsmall)">
 
 <div class="image fit captioned align-just">
-<a href="images/market_grid.jpg">
-<img src="images/market_grid.jpg" alt="" />
-</a>
-Posture-Appearance transfer on Market1501. Our method can also be used to disentangle posture and appearance. A quantitative evaluation can be found Table 1 in the supplementary material.
+<div class="videocontainer">
+<video controls class="videothing">
+<source src="images/taichi_2.mp4" type="video/mp4">
+Your browser does not support the video tag.
+</video>
+</div>
+Animating images of humans in the wild by poking a single pixel.
+</div>
+</div>
+</div>
 
+<div class="row 250%">
+<div class="6u 12u$(xsmall)">
+
+<div class="image fit captioned align-just">
+<div class="videocontainer">
+<video controls class="videothing">
+<source src="images/taichi_3.mp4" type="video/mp4">
+Your browser does not support the video tag.
+</video>
+</div>
+Animating images of humans in the wild by poking a single pixel.
+</div>
+</div>
+<div class="6u$ 12u$(xsmall)">
+
+<div class="image fit captioned align-just">
+<div class="videocontainer">
+<video controls class="videothing">
+<source src="images/taichi_4.mp4" type="video/mp4">
+Your browser does not support the video tag.
+</video>
+</div>
+Animating images of humans in the wild by poking a single pixel.
 </div>
 </div>
 </div>
+
+<div class="row 250%">
+<div class="6u 12u$(xsmall)">
+
+<div class="image fit captioned align-just">
+<div class="videocontainer">
+<video controls class="videothing">
+<source src="images/h36m_1.mp4" type="video/mp4">
+Your browser does not support the video tag.
+</video>
+</div>
+Animating images of humans by poking a single pixel.
+</div>
+</div>
+<div class="6u$ 12u$(xsmall)">
+
+<div class="image fit captioned align-just">
+<div class="videocontainer">
+<video controls class="videothing">
+<source src="images/h36m_2.mp4" type="video/mp4">
+Your browser does not support the video tag.
+</video>
+</div>
+Animating images of humans by poking a single pixel.
+</div>
+</div>
+</div>
+
+
+
 
 <!-- related works ! -->
 <!-- 
