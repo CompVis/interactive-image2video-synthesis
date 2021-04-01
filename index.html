@@ -111,7 +111,7 @@
               <h3>for the object categories of plants and humans.</h3>
              </header>
                 <p>
-                    WHen trained on interactions consisting of a shift \(p \in \mathbb{R}^2\) of the pixel at location \(l \in \mathbb{N}^2\), human users can apply our model to synthesize plausible object resppnses
+                    When trained on interactions consisting of a shift \(p \in \mathbb{R}^2\) of the pixel at location \(l \in \mathbb{N}^2\), human users can apply our model to synthesize plausible object resppnses
                     to such interactions based on still images. That is, human users can define the intended target location for the poked object part while our model infers matching object dynamics
                     for the remainder of object parts.
                 </p>
@@ -188,7 +188,7 @@ Results on the PP datasets, for simulated pokes obtained from optical flow in th
 </header>
 
 <p>
-    Also dynamics of highly-articualated objects such as humans can be learned without annotations available. Moreover, our model generalizes to unseen new instances, which have not been seen during training.
+    Also dynamics of highly-articulated objects such as humans can be learned without annotations available. Moreover, our model generalizes to unseen new instances, which have not been seen during training.
 </p>
 
 <div class="row 250%">
@@ -362,8 +362,101 @@ Results on the Human3.6M dataset, which contains complex human motion such as wa
 <section id="four" class="wrapper style2 special">
     <div class="container">
         <header class="major">
-            <h2>Addtional Applications and Experiments</h2>
+            <h2>Additional Applications and Experiments</h2>
         </header>
+        <header class="minor">
+            <h2>Interpreting the poke as initial impulse</h2>
+        </header>
+        <p>
+            When normalizing the magnitude of pokes over the entire dataset to be in between 0 and 1, thus removing information regarding the intended target location, the poke can be interpreted as an initial force pr impulse onto
+            the object part interacted with. Consequently, our model now generates sequences showing object reactions to the initial impulse defined by the interaction, where larger pokes correspond
+            to similarly large amounts of object dynamics whereas interactions with a small magnitude result in subtle object motion.
+        </p>
+
+        <div class="row 250%">
+            <div class="6u 12u$(xsmall)">
+                <div class="image fit captioned align-just">
+                    <div class="videocontainer">
+                        <video controls class="videothing">
+                        <source src="images/impulse_model_1.mp4" type="video/mp4">
+                        Your browser does not support the video tag.
+                        </video>
+                    </div>
+                    Results for the interpretation of poke as an initial impulse onto the object at the respective location.
+                </div>
+            </div>
+            <div class="6u$ 12u$(xsmall)">
+
+                <div class="image fit captioned align-just">
+                <div class="videocontainer">
+                <video controls class="videothing">
+                <source src="images/impulse_model_2.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+                </video>
+                </div>
+                Results for the interpretation of poke as an initial impulse onto the object at the respective location.
+                </div>
+            </div>
+        </div>
+
+
+        <header class="minor">
+            <h2>Generalization to Images obtained from web-search</h2>
+        </header>
+        <p>
+            When combining the PP dataset and the vegetation samples from the Dynamic Textures Database, our model can be shown to generalize to images obtained from web-search.
+        </p>
+
+    <div class="row 150%">
+            <div class="6u 12u$(xsmall)">
+                <div class="image fit captioned align-just">
+                    <div class="videocontainer">
+                        <video controls class="videothing">
+                        <source src="images/generalization_1.mp4" type="video/mp4">
+                        Your browser does not support the video tag.
+                        </video>
+                    </div>
+                    Results on images obtained from web-search demonstrate the generalization capabilities of our model. In last column, we show the nearest neighbour of the respective input image in the train data.
+                </div>
+            </div>
+            <div class="6u$ 12u$(xsmall)">
+
+                <div class="image fit captioned align-just">
+                <div class="videocontainer">
+                <video controls class="videothing">
+                <source src="images/generalization_3.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+                </video>
+                </div>
+                Results on images obtained from web-search demonstrate the generalization capabilities of our model. In last column, we show the nearest neighbour of the respective input image in the train data.
+                </div>
+            </div>
+        </div>
+    <div class="row 150%">
+            <div class="6u 12u$(xsmall)">
+                <div class="image fit captioned align-just">
+                    <div class="videocontainer">
+                        <video controls class="videothing">
+                        <source src="images/generalization_4.mp4" type="video/mp4">
+                        Your browser does not support the video tag.
+                        </video>
+                    </div>
+                    Results on images obtained from web-search demonstrate the generalization capabilities of our model. In last column, we show the nearest neighbour of the respective input image in the train data.
+                </div>
+            </div>
+            <div class="6u$ 12u$(xsmall)">
+
+                <div class="image fit captioned align-just">
+                <div class="videocontainer">
+                <video controls class="videothing">
+                <source src="images/generalization_2.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+                </video>
+                </div>
+                Results on images obtained from web-search demonstrate the generalization capabilities of our model. In last column, we show the nearest neighbour of the respective input image in the train data.
+                </div>
+            </div>
+        </div>
     </div>
 </section>
 
