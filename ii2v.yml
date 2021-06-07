@@ -1,0 +1,45 @@
+name: ii2v
+channels:
+  - pytorch
+  - conda-forge
+  - defaults
+dependencies:
+  - cudatoolkit=10.2.89
+  - gpustat=0.6.0
+  - ignite=0.4.1
+  - imageio=2.9.0
+  - imagesize=1.2.0
+  - ipython=7.16.1
+  - matplotlib=3.2.1
+  - pandas=1.1.1
+  - pillow=7.1.2
+  - pip=20.0.2
+  - pyqt=5.9.2
+  - python=3.7.7
+  - pytorch=1.6.0
+  - pyyaml=5.3.1
+  - qt=5.9.7
+  - scikit-image=0.16.2
+  - scikit-learn=0.23.2
+  - torchvision=0.7.0
+  - tqdm=4.47.0
+  - yaml=0.2.5
+  - pip:
+    - array2gif==1.0.4
+    - coloredlogs==14.0
+    - imageio-ffmpeg==0.4.2
+    - imutils==0.5.3
+    - kornia==0.4.0
+    - lpips==0.1
+    - moviepy==1.0.3
+    - natsort==7.0.1
+    - numpy==1.19.1
+    - opencv-python==4.2.0.34
+    - opt-einsum==3.3.0
+    - pytorch-lightning==0.9.1rc3
+    - scipy==1.5.2
+    - tensorboard==2.2.0
+    - tensorboard-plugin-wit==1.7.0
+    - tfrecord==1.11
+    - torchsummary==1.5.1
+    - wandb==0.9.3

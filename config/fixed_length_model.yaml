@@ -1,0 +1,161 @@
+# Here goes all training information and the required parameters; this file can be filled propperly and renamed
+general:
+  # add base directory: here'll go all the logs and training info about the run
+  base_dir: "/export/scratch/ablattma/visual_poking/"
+  # whether to start the training/testing run in debug mode
+  debug: False
+  # if project name is already existing and not restart_from_checkpoint or infer, then an error is thrown
+  project_name: plants-fixed_length-bs10-64-ss1-mf10-baseline-1st_order #h36m-fixed_length-512deep-mf10-bs20-ss2-6-ps3-ll.1-gui_split-mask    #iper-fixed_length-512deep-mf9-bs8ss1 #h36m-fixed_length-512deep-mf10-bs20-ss2-6-ps3-ll.1-gui_split-mask #taichi-fixed_length-512deep-mf10-bs9ss2-128 #plants-fixed_length-very_deep-bs6-64-ss1-constforce-largegantmp      #plant-fixed_length-very_deep-bs6-64-ss1-mf10-baseline_wo_hier  #plants-fixed_length-very_deep-bs6-128-ss2-mf10-constforce-gantmp1.5    #plants-fixed_length-bs6-l16-64-ss2-nref5-debugexp-fiexedlensampler #plants-fixed_length-bs9-ss64-common_temp_disc  #plants-fixed_length-bs9-ss64-common_temp_disc-gp0.1 #iper-fixed_length-bs9-ss64-patch_temp_disc #iper-deep-fixed_length-10-deep # iper-maxf10-bs12-skip-64-ldl5-pdl0-vgg5-patchganorig_gp.0001-gantmpold.01gpfmap10-nopokeimg-snorm  #plants-maxf15-bs8-nodis-skip-64-baseline-ganstart1-fvd #plants-minf5-maxf25-bs10-dynskip-nodis-skip-64-pixel_dyn_mse #plants-minf5-maxf15-bs10-nodis-skip-64-gan-ps5 #plants-minf5-maxf15-bs10-dynskip-nodis-skip1-64-baseline-ps5    #-gan-fm1-gp0.01-gen1.5 #basic_poke_model-Iper-bs14-adain-mse-flow-ib
+  experiment: fixed_length_model
+  seed: 42
+
+data:
+  dataset: IperDataset
+  spatial_size: !!python/tuple [64,64]
+  poke_size: 3
+  n_pokes: 1
+  # whether to split after videos or randomly (in a reproducible way)
+  split: gui #official
+  num_workers: 20
+  excluded_objects: [] # for iper leave empty, for plants, use [8]
+  # list containing the lags, curren6l, its indices are allowed to be within the intervall [0,5], otherwise, an error is throw
+  # can be in [image, video]
+  yield_videos: True
+  # augmentation parameters for color transformations
+  p_col: 0.8
+  p_geom: 0.8
+  augment_b: 0.4
+  augment_c: 0.5
+  augment_h: 0.15
+  augment_s: 0.4
+  # augmentation parameters for geometric transformations
+  aug_deg: 15 # for iper use 0, for plants use 30°
+  # translation is (vertical, horizontal)
+  aug_trans: !!python/tuple [0.1,0.1] # for iper use [0.1,0.6], for plants use [0.1,0.1]
+  # whether to get flow weight
+  foreground_value: 10.
+  background_weight: 1.
+  # filter
+  filter: all
+  fancy_aug: False
+  # whether to load flow/images in ram
+  flow_in_ram: False
+  imgs_in_ram: False
+  # sequence parameters
+  max_frames: 10
+  augment_wo_dis: True
+  equal_poke_val: True
+  subsample_step: 1
+  flow_weights: False
+  n_ref_frames: 10
+  scale_poke_to_res: True
+
+
+training:
+  n_epochs: 1000
+  lr: 0.0001
+  batch_size: 10
+  lr_reduce: 0.3
+  # gets multiplicated with n_epochs
+  tau: [0.01,0.025,0.05]   #1. means no schedule
+  #weight_decay: 0.
+  # weight for the dynamics regularizer
+  pixel_dynamics_vgg: False
+  latent_dynamics_weight: 0.1
+  pixel_dynamics_weight: 0.
+  pixel_dyn_spatial: True
+  vgg_dyn_weight: 5.
+  style_loss_weight: 0.5
+  lr_dec_end_it: 35000
+  lr_dec_end_val: 0.0001
+  fancy_vgg_weights: False
+  decoder_update_tk: True
+  kl_weight: .001
+  # this means that zeropokes are also considered
+  custom_sampler: False
+  zeropoke_amount: 8
+  poke_jump: False
+  target_weight: 1.
+  singlestage: False
+
+
+architecture:
+  nf_first: 32
+  nf_deep: 512
+  min_spatial_size: 16
+  zeroflow_baseline: False
+  # if adain is used, the decoder is fed the appearance representation via ADAIN
+  disentanglement: False
+  n_gru_layers: 2
+  poke_and_img: False
+  # whether to downsample in final resnet blocks of the appearance encoder (exected better appearance code, as alternative is an average pooling over 16x16 spatial res
+  # only enable if adain is used
+  resnet_down: True
+  # whether to apply [skip connection
+  use_skip_model: False
+  poke_every_t: True
+  spectnorm_decoder: False
+  poke_scale: False
+
+
+
+# if patch discriminator is used
+gan:
+  use: True
+  n_layers: 3
+  gp_weight: 0.0001
+  fmap_weight: 0.
+  pixel_dynamics: False
+  gen_weight: 1
+  bce_loss: False
+  deep_disc: False
+  deep_layers: 1
+  start_iteration: 4000 #8000
+  n_examples: 16
+
+gan_temp:
+  use: True
+  gp_weight: .1
+  fmap_weight: 10.
+  gen_weight: 5.
+  bce_loss: False
+  start_iteration: 4000 #8000
+  patch_temp_disc: False
+  num_classes: 1
+  conditional: False
+  base_norm_spade: instance
+
+
+testing:
+  ckpt_intervall: 1000
+  log_intervall: 500 # use 300
+  test_img_intervall: 500 # use 500
+  n_epoch_metrics: 1
+  test_batch_size: 16
+  n_logged_img: 4
+  n_test_img: 16
+  test_it: 4
+  eval_app_transfer: False
+  # computes metrics on patches, if patches are available for the selected dataset
+  metrics_on_patches: False
+  n_saved_ckpts: 10
+  # evaluation
+  n_examples_noise: 10
+
+
+ui:
+  ckpt_strategy: "latest"
+  ckpt_dir: None #/export/scratch2/ablattma/visual_poking/sequence_poke_model/ckpt/iper-maxf10-bs12-skip-64-ldl5-pdl0-vgg5-patchganorig_gp.0001-gantmpold.1gpfmap10-offsplit-rightzeropoke-nopokeimg/good_ckpt
+  ckpt_name: None #reg_ckpt_checkpoint_147000.pt
+  display_size: 128
+  debug: False
+  fixed_length: True
+  seq_length_to_generate: 10
+  fps: 8
+  save_gif: True
+  fixed_seed: False
+  project_name: taichi-fixed_length-512deep-mf10-bs9ss2-128 #plants-fixed_length-bs8-64-ss1-mf10-wo_weight #h36m-fixed_length-512deep-mf10-bs9ss2-128-mask-ll.1 #iper-fixed_length-512deep-mf10-bs9-ss1-128 #taichi-fixed_length-512deep-mf10-bs9ss2-128 # #plants-fixed_length-512deep-mf10-bs9-ss2-128 #iper-fixed_length-512deep-mf10-bs9-ss1-128
+  percentile: 90
+  interactive: True
+  ids: []
+  n_gt_pokes: 5
