@@ -12,18 +12,13 @@ def create_dir_structure(config):
         structure = {subdir: path.join(os.environ["DATAPATH"],structure[subdir]) for subdir in structure}
     return structure
 
-def load_parameters(config_name, restart, test_code):
+def load_parameters(config_name, restart,debug):
     with open(config_name,"r") as f:
         cdict = yaml.load(f,Loader=yaml.FullLoader)
     # if we just want to test if it runs
-    if test_code:
-        # project_name needs to change, so we do not overwrite anything!
-        cdict["general"]["project_name"] = "test_run_kjsfkh"
-        cdict["general"]["testCode"] = True
-        cdict["testing"]["ckpt_intervall"] = 10
-        cdict["testing"]["test_img_intervall"] = 10
-    else:
-        cdict["general"]["testCode"] = False
+    if debug:
+        cdict['general']['project_name'] = 'debug'
+
     dir_structure = create_dir_structure(cdict["general"])
     saved_config = path.join(dir_structure["config"], "config.yaml")
     if restart:
@@ -35,14 +30,10 @@ def load_parameters(config_name, restart, test_code):
 
     else:
         [makedirs(dir_structure[d],exist_ok=True) for d in dir_structure]
-        if path.isfile(saved_config) and not cdict["general"]["debug"]:
+        if path.isfile(saved_config) and not debug:
             print(f"\033[93m" + "WARNING: Model has been started somewhen earlier: Resume training (y/n)?" + "\033[0m")
             while True:
-                if not test_code:
-                    answer = input()
-                    # answer = "n"
-                else:
-                    answer = "n"
+                answer = input()
                 if answer == "y" or answer == "yes":
                     with open(saved_config,"r") as f:
                         cdict = yaml.load(f, Loader=yaml.FullLoader)
@@ -59,6 +50,7 @@ def load_parameters(config_name, restart, test_code):
             with open(saved_config, "w") as f:
                 yaml.dump(cdict,f,default_flow_style=False)
 
+    cdict['general']['debug'] = debug
     return cdict, dir_structure, restart
 
 
@@ -68,10 +60,10 @@ if __name__ == '__main__':
                         default="config/latent_flow_net.yaml",
                         help="Define config file")
     parser.add_argument("-r","--restart", default=False,action="store_true",help="Whether training should be resumed.")
+    parser.add_argument("-d", "--debug", default=False, action="store_true", help="Whether training should be resumed.")
     parser.add_argument("--gpu",default=[0], type=int,
                         nargs="+",help="GPU to use.")
     parser.add_argument("-m","--mode",default="train",type=str,choices=["train","test"],help="Whether to start in train or infer mode?")
-    parser.add_argument("--testCode", default=False, type=bool, help="Start Code for test purposes. I.e. does it run?")
     parser.add_argument("--test_mode",default="metrics",type=str, choices=["noise_test","metrics","fvd",'diversity','render'], help="The mode in which the test-method should be executed.")
     parser.add_argument("--metrics_on_patches", default=False,action="store_true",help="Whether to run evaluation on patches (if available or not).")
     parser.add_argument("--best_ckpt", default=False, action="store_true",help="Whether to use the best ckpt as measured by LPIPS (otherwise, latest_ckpt is used)")
@@ -80,7 +72,7 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    config, structure, restart = load_parameters(args.config, args.restart or args.mode == "test", args.testCode)
+    config, structure, restart = load_parameters(args.config, args.restart or args.mode == "test",args.debug)
     config["general"]["restart"] = restart
     config["general"]["mode"] = args.mode
     config["general"]["first_stage"] = args.first_stage

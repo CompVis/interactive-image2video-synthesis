@@ -75,34 +75,6 @@ def get_transforms(config):
                 tt.Lambda(lambda x: (x * 2.0) - 1.0),
             ]
         ),
-        "IperCVPDataset": tt.Compose(
-            [   tt.Resize((IperCVPDataset.H,IperCVPDataset.W)),
-                tt.ToTensor(),
-                imagenet_preprocess(),
-            ]
-        ),
-        "TaichiCVPDataset": tt.Compose(
-            [tt.Resize((TaichiCVPDataset.H, TaichiCVPDataset.W)),
-             tt.ToTensor(),
-             imagenet_preprocess(),
-             ]
-        ),
-        "CIPlants":tt.Compose(
-            [
-                tt.ToTensor(),
-            ]),
-        "CIper": tt.Compose(
-            [
-                tt.ToTensor(),
-            ]),
-        "CITaichi": tt.Compose(
-            [
-                tt.ToTensor(),
-            ]),
-        "CIH36m": tt.Compose(
-            [
-                tt.ToTensor(),
-            ]),
 
     }
 

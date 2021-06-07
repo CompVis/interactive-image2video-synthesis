@@ -1,0 +1,44 @@
+version: 1
+
+formatters:
+    standard:
+        format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    error:
+        format: "%(levelname)s <PID %(process)d:%(processName)s> %(name)s.%(funcName)s(): %(message)s"
+
+handlers:
+    console:
+        class: logging.StreamHandler
+        level: DEBUG
+        formatter: standard
+
+root:
+    level: DEBUG
+    handlers: [console]
+    propagate: no
+
+loggers:
+    models:
+        level: DEBUG
+        handlers: []
+        propagate: yes
+
+    experiments.latent_flow_net.LatentFlowNet:
+        level: INFO
+        handlers: []
+        propagate: yes
+
+    matplotlib.legend:
+        level: ERROR
+        handlers: []
+        propagate: yes
+
+    ignite:
+        level: WARN
+        handlers: []
+        propagate: yes
+
+    PIL.PngImagePlugin:
+        level: ERROR
+        handlers: []
+        propagate: yes

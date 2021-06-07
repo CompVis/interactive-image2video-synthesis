@@ -47,10 +47,8 @@ class Experiment:
         rng = np.random.RandomState(self.config["general"]["seed"])
 
         if self.config["general"]["mode"] == "train":
-            if self.config["general"]["testCode"]:
-                project = "test_project"
-            else:
-                project = "visual_poking_unsupervised"
+
+            project = "visual_poking_unsupervised"
             wandb.init(
                 dir=self.dirs["log"],
                 project=project,
