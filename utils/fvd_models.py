@@ -23,6 +23,12 @@ if __name__ == '__main__':
     logger = get_logger("eval-models")
 
     base_path = args.base
+
+    if "DATAPATH" in os.environ:
+        base_path = os.environ['DATAPATH'] + base_path
+
+    logger.info(f'Base path is "{base_path}"')
+
     gpu = args.gpu
 
     for n in model_names:
