@@ -10,7 +10,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument("-b", "--base", type=str,
-                        default="/export/scratch/ablattma/visual_poking/fixed_length_model/generated",
+                        default="/export/scratch3/ablattma/visual_poking/fixed_length_model/generated",
                         help="Source directory.")
     parser.add_argument("--gpu", type=int, required=True, help="The target device.")
 
