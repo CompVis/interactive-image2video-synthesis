@@ -569,7 +569,7 @@ class FixedLengthModel(Experiment):
 
         # checkpointing
         self.logger.info("Add checkpointing and pbar...")
-        n_saved = self.config["testing"]["n_saved_ckpts"] if "n_saved_ckpts" in self.config["testing"] else 10
+        n_saved = 10
         self.logger.info(f"Checkpoint saving window is {n_saved}")
         ckpt_handler = ModelCheckpoint(self.dirs["ckpt"], "reg_ckpt", n_saved=n_saved, require_empty=False)
         save_dict = {"model": net, "optimizer_dis": optimizer_dis, "optimizer_dyn": optimizer_dyn}

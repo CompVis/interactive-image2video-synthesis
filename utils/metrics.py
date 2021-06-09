@@ -14,8 +14,8 @@ from tqdm import tqdm
 class FIDInceptionModel(nn.Module):
     def __init__(self, normalize_range=True):
         super().__init__()
-        self.v3 = inception_v3(pretrained=True)
-        self.v3.aux_logits = False
+        self.v3 = inception_v3(pretrained=True,aux_logits=False)
+        # self.v3.aux_logits = False
 
 
         self.register_buffer(
