@@ -12,12 +12,14 @@ def create_dir_structure(config):
         structure = {subdir: path.join(os.environ["DATAPATH"],structure[subdir]) for subdir in structure}
     return structure
 
-def load_parameters(config_name, restart,debug):
+def load_parameters(config_name, restart,debug,project_name):
     with open(config_name,"r") as f:
         cdict = yaml.load(f,Loader=yaml.FullLoader)
-    # if we just want to test if it runs
     if debug:
         cdict['general']['project_name'] = 'debug'
+    else:
+        cdict['general']['project_name'] = project_name
+
 
     dir_structure = create_dir_structure(cdict["general"])
     saved_config = path.join(dir_structure["config"], "config.yaml")
@@ -59,6 +61,7 @@ if __name__ == '__main__':
     parser.add_argument("-c", "--config", type=str,
                         default="config/latent_flow_net.yaml",
                         help="Define config file")
+    parser.add_argument('-p''--project_name',type=str,default='ii2v',help='unique name for the training run to be (re-)started.')
     parser.add_argument("-r","--restart", default=False,action="store_true",help="Whether training should be resumed.")
     parser.add_argument("-d", "--debug", default=False, action="store_true", help="Whether training should be resumed.")
     parser.add_argument("--gpu",default=[0], type=int,
@@ -67,12 +70,10 @@ if __name__ == '__main__':
     parser.add_argument("--test_mode",default="metrics",type=str, choices=["noise_test","metrics","fvd",'diversity','render'], help="The mode in which the test-method should be executed.")
     parser.add_argument("--metrics_on_patches", default=False,action="store_true",help="Whether to run evaluation on patches (if available or not).")
     parser.add_argument("--best_ckpt", default=False, action="store_true",help="Whether to use the best ckpt as measured by LPIPS (otherwise, latest_ckpt is used)")
-    parser.add_argument("--first_stage", action="store_true", default=False, help="Whether to train first stage or load pretrained encoder decoder model and train 2nd stage")
-    parser.add_argument("--all_ckpt", default=False, action="store_true", help="whether to evaluate all ckpt.")
 
     args = parser.parse_args()
 
-    config, structure, restart = load_parameters(args.config, args.restart or args.mode == "test",args.debug)
+    config, structure, restart = load_parameters(args.config, args.restart or args.mode == "test",args.debug,args.project_name)
     config["general"]["restart"] = restart
     config["general"]["mode"] = args.mode
     config["general"]["first_stage"] = args.first_stage
