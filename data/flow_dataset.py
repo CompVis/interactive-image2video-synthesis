@@ -33,15 +33,11 @@ class PlantDataset(BaseDataset):
         # set instace specific fixed values which shall not be parameters from yaml
         self._set_instance_specific_values()
 
-        if "DATAPATH" in os.environ:
-            self.datapath = path.join(os.environ["DATAPATH"],self.datapath[1:])
 
         self.subsample_step = config["subsample_step"] if "subsample_step" in config else self.subsample_step
 
         self.logger.info(f'Subsample step of {self.__class__.__name__} is {self.subsample_step}.')
 
-        if "BASEPATH_PREFIX" in os.environ:
-            self.datapath = os.environ["BASEPATH_PREFIX"]+self.datapath
         filt_msg = "enabled" if self.filter_flow else "disabled"
         self.logger.info(f"Flow filtering is {filt_msg} in {self.__class__.__name__}!")
         self.logger.info(f"Valid lag of {self.__class__.__name__} is {self.valid_lags[0]}")
@@ -55,11 +51,7 @@ class PlantDataset(BaseDataset):
         if path.isfile(path.join(self.datapath,"dataset_stats.p")) and self.normalize_flows:
             with open(path.join(self.datapath,"dataset_stats.p"),"rb") as norm_file:
                 self.flow_norms = pickle.load(norm_file)
-        # elif path.isfile(path.join(self.datapath,"dataset_stats_pixels.p")):
-        #     with open(path.join(self.datapath,"dataset_stats_pixels.p"),"rb") as norm_file:
-        #         self.flow_norms = pickle.load(norm_file)
-        # else:
-        #     raise FileNotFoundError("No valid file for dataset stats in pixels, or normalized version found. ")
+
 
         # choose filter procedure
         available_frame_nrs = np.asarray([int(p.split("/")[-1].split(".")[0].split("_")[-1]) - int(p.split("/")[-1].split(".")[0].split("_")[-2]) for p in self.data["flow_paths"][0]])
@@ -227,12 +219,8 @@ class PlantDataset(BaseDataset):
 
         if not 8 in self.excluded_objects:
             self.excluded_objects.append(8)
-        if self.config["spatial_size"][0] <= 256:
-            self.metafilename = "plants_256_resized_frange"
-            self.datapath = "/export/scratch/compvis/datasets/plants/processed_256_resized/"
-        else:
-            self.metafilename = "plants_2"
-            self.datapath = "/export/scratch/compvis/datasets/plants/processed_crops/"
+        self.metafilename = "plants_256_resized_frange"
+
 
     def _read_flows(self,data):
         read_flows = []
@@ -338,29 +326,29 @@ class PlantDataset(BaseDataset):
         return self.datadict["img_path"].shape[0]
 
 
-class UIDummyDataset(PlantDataset):
-
-    def _set_instance_specific_values(self):
-        self.valid_lags = [1]
-        self.flow_cutoff = 0.4
-        self.extended_annotations = False
-        self.subsample_step = 1
-        self.min_frames = 1
-        self.max_frame = 1
-
-        fpath = path.dirname(path.realpath(__file__))
-        self.metafilename = "dummy_dataset_frange"
-        self.datapath = path.abspath(path.join(fpath, "../UI/DummyDataset"))
-
-    def _make_split(self,data):
-
-        train_ids = np.asarray(list(range(max(int(self.data["img_path"].shape[0]/10),1))))
-        test_ids = np.asarray(list(range(max(int(self.data["img_path"].shape[0]/10),1),self.data["img_path"].shape[0])))
-
-        split_data = {"train": {key: data[key][train_ids] for key in data},
-                      "test": {key: data[key][test_ids] for key in data}}
-
-        return split_data, train_ids, test_ids
+# class UIDummyDataset(PlantDataset):
+#
+#     def _set_instance_specific_values(self):
+#         self.valid_lags = [1]
+#         self.flow_cutoff = 0.4
+#         self.extended_annotations = False
+#         self.subsample_step = 1
+#         self.min_frames = 1
+#         self.max_frame = 1
+#
+#         fpath = path.dirname(path.realpath(__file__))
+#         self.metafilename = "dummy_dataset_frange"
+#         self.datapath = path.abspath(path.join(fpath, "../UI/DummyDataset"))
+#
+#     def _make_split(self,data):
+#
+#         train_ids = np.asarray(list(range(max(int(self.data["img_path"].shape[0]/10),1))))
+#         test_ids = np.asarray(list(range(max(int(self.data["img_path"].shape[0]/10),1),self.data["img_path"].shape[0])))
+#
+#         split_data = {"train": {key: data[key][train_ids] for key in data},
+#                       "test": {key: data[key][test_ids] for key in data}}
+#
+#         return split_data, train_ids, test_ids
 
 class VegetationDataset(PlantDataset):
 
@@ -370,7 +358,7 @@ class VegetationDataset(PlantDataset):
         self.flow_cutoff = .3
         self.min_frames = 5
         self.subsample_step = 2
-        self.datapath = "/export/data/ablattma/Datasets/vegetation_new/"
+        # self.datapath = "/export/data/ablattma/Datasets/vegetation_new/"
         self.metafilename = "vegetation_new"
         self.datadict.update({"train": []})
         self.obj_weighting = True
@@ -401,7 +389,7 @@ class TaichiDataset(VegetationDataset):
         self.flow_cutoff = .1
         self.min_frames = 5
         self.subsample_step = 2
-        self.datapath = "/export/scratch/compvis/datasets/taichi/taichi/"
+        # self.datapath = "/export/scratch/compvis/datasets/taichi/taichi/"
         self.metafilename = "meta_data_frange" if self.normalize_flows else "meta_with_10_20"
         self.datadict.update({"train": []})
         self.obj_weighting = False
@@ -409,19 +397,6 @@ class TaichiDataset(VegetationDataset):
         self.flow_weights = self.config["flow_weights"] if "flow_weights" in self.config else True
         self.flow_width_factor = 5
         self.target_lags = [10,20]
-
-class BairDataset(VegetationDataset):
-
-    def _set_instance_specific_values(self):
-        self.filter_flow = False
-        self.valid_lags = [0]
-        self.flow_cutoff = .3
-        self.min_frames = 3
-        self.subsample_step = 1
-        self.datapath = "/export/data2/ablattma/Datasets/bair/extracted/"
-        self.metafilename = "bair_lag8_16"
-        self.datadict.update({"train": []})
-        self.excluded_objects = []
 
 
 class LargeVegetationDataset(VegetationDataset):
@@ -432,7 +407,7 @@ class LargeVegetationDataset(VegetationDataset):
         self.flow_cutoff = .1
         self.min_frames = 5
         self.subsample_step = 2
-        self.datapath = "/export/scratch/compvis/datasets/plants/processed_256_resized/"
+        # self.datapath = "/export/scratch/compvis/datasets/plants/processed_256_resized/"
         self.metafilename = "vegetation_large_meta_frange"
         self.datadict.update({"train": []})
         self.excluded_objects = [1,2,3]
@@ -449,12 +424,10 @@ class IperDataset(PlantDataset):
 
         self.min_frames = 5
 
-        if self.config["spatial_size"][0] <= 256:
-            self.datapath = "/export/scratch/compvis/datasets/iPER/processed_256_resized/"
-            self.metafilename = "meta_frange_kp_weights_nn"
-        else:
-            self.datapath = "/export/scratch/compvis/datasets/iPER/processed/"
-            self.metafilename = "iper_full"
+
+        # self.datapath = "/export/scratch/compvis/datasets/iPER/processed_256_resized/"
+        self.metafilename = "meta_frange_kp_weights_nn"
+
         self.datadict.update({"actor_id": [], "action_id": []})
 
         # set object weighting always to false
@@ -550,7 +523,7 @@ class Human36mDataset(PlantDataset):
         self.subsample_step = 2
 
 
-        self.datapath = "/export/scratch/compvis/datasets/human3.6M/video_prediction"
+        # self.datapath = "/export/scratch/compvis/datasets/human3.6M/video_prediction"
 
         self.metafilename = "h36_test_smaller"
         self.datadict.update({"actor_id": [], "action_id": [], "train": []})

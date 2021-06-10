@@ -10,7 +10,8 @@ general:
   seed: 42
 
 data:
-  dataset: IperDataset
+  dataset: PlantDataset
+  datapath: /export/scratch/compvis/datasets/plants/processed_256_resized # the path were the data is stored for the respective dataset
   spatial_size: !!python/tuple [64,64]
   poke_size: 3
   n_pokes: 1

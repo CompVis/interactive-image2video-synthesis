@@ -41,6 +41,8 @@ class BaseDataset(Dataset, LoggingParent):
         self.train = train
         assert "spatial_size" in self.config
 
+        self.datapath = self.config['datapath']
+
         # self.valid_lags = np.unique(self.config["valid_lags"]) if "valid_lags" in self.config else list(range(6))
 
 
