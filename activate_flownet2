@@ -1,0 +1,6 @@
+# deactivates current environment and sets everything up for applying flownet2
+conda deactivate
+export PATH="${PATH}:/usr/local/cuda-10.0/bin/"
+export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/local/cuda-10.0/lib64:/usr/local/cuda-10.0/lib"
+
+conda activate flownet2
