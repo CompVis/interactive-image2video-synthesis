@@ -22,7 +22,7 @@ class FlownetPipeline:
         """
         # load model savefile
         save = torch.load(
-            "/export/data2/ablattma/Datasets/plants/pretrained_models/FlowNet2_checkpoint.pth.tar")
+            "/export/scratch/compvis/datasets/plants/pretrained_models/FlowNet2_checkpoint.pth.tar")
         model = FlowNet2(args, batchNorm=False)
 
         untrained_statedict = model.state_dict()

@@ -1,6 +1,6 @@
 from data.base_dataset import BaseDataset
 from torchvision import transforms as tt
-from data.flow_dataset import PlantDataset, IperDataset,Human36mDataset, VegetationDataset, LargeVegetationDataset, BairDataset, TaichiDataset
+from data.flow_dataset import PlantDataset, IperDataset,Human36mDataset, VegetationDataset, LargeVegetationDataset, TaichiDataset
 
 
 # add key value pair for datasets here, all datasets should inherit from base_dataset

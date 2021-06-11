@@ -1069,12 +1069,5 @@ class SequencePokeModel(Experiment):
             np.save(path.join(savedir,"fake_samples.npy"),fake_samples)
 
             self.logger.info(f'Finish generation of vid samples.')
-
-        elif self.config["testing"]["mode"] == "fvd":
-
-            ids = []
-            n_gt_pokes = []
-
-            for id in ids:
-
-                batch = test_dataset.__getitem__()
+        else:
+            raise ValueError(f'Specified testing mode "{self.config["testing"]["mode"]}" does not exist.')

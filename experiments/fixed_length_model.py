@@ -17,7 +17,7 @@ from data import get_dataset
 from data.samplers import FixedLengthSampler
 from models.latent_flow_net import SingleScaleBaseline,SkipSequenceModel
 from models.discriminator import GANTrainer
-from utils.losses import PerceptualVGG,vgg_loss_agg,DynamicsLoss, pixel_triplet_loss, style_loss, PixelDynamicsLoss, kl_loss
+from utils.losses import PerceptualVGG,vgg_loss_agg,DynamicsLoss, style_loss
 from utils.testing import make_flow_grid, make_img_grid, make_video, make_plot
 from utils.metrics import metric_fid, FIDInceptionModel, metric_lpips, psnr_lightning, ssim_lightning
 from utils.general import linear_var, get_member, get_patches
@@ -141,10 +141,6 @@ class FixedLengthModel(Experiment):
                 worker_init_fn=w_init_fn,
                 drop_last=True
             )
-            # n_eval_frames = int(test_dataset.max_frames/2)
-            # if int(test_dataset.min_frames + n_eval_frames) % 2 != 0:
-            #     n_eval_frames+=1
-
 
             # no zeropoke for evaluation as zeropoke is only to ensure no reaction when poking outside
             eval_sampler = SequentialSampler(test_dataset,)
@@ -278,7 +274,7 @@ class FixedLengthModel(Experiment):
             n_ref_frames = self.config["data"]["n_ref_frames"] - 1 if self.poke_scale_mode else train_dataset.max_frames -1
 
 
-            # disentanglement loss
+            # static loss to obtain fixed image state space
             if "singlestage" not in self.config["training"] or not self.config["training"]["singlestage"]:
                 loss_dis = loss_dis + vgg_loss_agg(self.vgg, x_t, x_t_hat_i)
 
@@ -290,7 +286,10 @@ class FixedLengthModel(Experiment):
 
                 out_dict.update({"loss_dis" : loss_dis.item()})
 
-            # forward pass for training of dynamics part of the model
+            #optimize in alternating gradient descent as this results in equal results than training the static/dynamic model in two completely seperate stages
+            # however, it performs significantly better than training both models jointly with a single optimizer step (see ablations or run the model with 'singlestage' set to true)
+
+            # forward pass for training of dynamics part of  the model
             # dynamics losses
             seq_len = x_seq.shape[1]
             seq_rec, mu_delta, sigmas_hat, logstd_delta = net(x_t,shape_img,poke,len=seq_len,
@@ -303,10 +302,7 @@ class FixedLengthModel(Experiment):
             if weights is not None:
                 seq_rec = get_patches(seq_rec,weights,self.config["data"],train_dataset.weight_value_flow, logger=self.logger)
                 x_seq = get_patches(x_seq,weights,self.config["data"],train_dataset.weight_value_flow, logger=self.logger)
-            #x_hat_tn, sigmas_gt,  *_ = net(x_seq.view(-1,*x_seq.shape[2:]),x_seq.view(-1,*x_seq.shape[2:]),poke,len=0)
-            #ll_loss_dyn = vgg_loss_agg(self.vgg,x_seq.view(-1,*x_seq.shape[2:]),seq_rec.view(-1,*seq_rec.shape[2:]))
 
-            #latent_loss_dyn = latent_dynamics_loss(sigmas_hat.view(-1,*sigmas_hat.shape[2:]),sigmas_gt,[])
 
 
             for n in range(seq_len):
@@ -319,9 +315,6 @@ class FixedLengthModel(Experiment):
             ll_loss_dyn = torch.stack(ll_loss_dyn,dim=0).mean()
             rec_imgs  = torch.stack(rec_imgs,1)
 
-            # if weights is not None:
-            #     rec_imgs = get_patches(rec_imgs,weights,self.config["data"],train_dataset.weight_value_flow, logger=self.logger)
-
             #latent dynamics
             dyn_losses = []
             for s_tk,s_hat_tk in zip(sigmas_gt,sigmas_hat):
@@ -329,13 +322,6 @@ class FixedLengthModel(Experiment):
             latent_loss_dyn = torch.stack(dyn_losses).mean()
             loss_dyn = self.config["training"]["vgg_dyn_weight"] * ll_loss_dyn + self.config["training"]["latent_dynamics_weight"] * latent_loss_dyn
 
-            # pixel dynamics
-            # loss_dec_dyn = []
-            # for n in range(seq_len-1):
-            #     loss_dec_dyn_tn = pixel_dynamics_loss(x_seq[:,n],x_seq[:,n+1],rec_imgs[:,n],seq_rec[:,n+1])
-            #     loss_dec_dyn.append(loss_dec_dyn_tn)
-            # loss_dec_dyn = torch.stack(loss_dec_dyn,dim=0).mean()
-            # loss_dyn = loss_dyn + self.config["training"]["pixel_dynamics_weight"] * loss_dec_dyn
 
             if self.use_gan and engine.state.iteration >= self.config["gan"]["start_iteration"]:
                 if self.config["gan"]["pixel_dynamics"]:
@@ -382,8 +368,6 @@ class FixedLengthModel(Experiment):
                 out_dict.update(disc_dict_temp)
                 out_dict.update({"loss_gen_temp" :loss_gen_temp.item(), "loss_fmap_temp": loss_fmap_temp.item()})
 
-            #if self.pixel_decoder_loss:
-            #out_dict.update({"pixel_loss_dec": loss_dec_dyn.item()})
 
             return out_dict
 
@@ -465,17 +449,6 @@ class FixedLengthModel(Experiment):
 
 
                 out_dict.update({"vgg_loss_dyn_eval": ll_loss_tk_eval.item(), "loss_dis_i_eval": ll_loss_t_i_eval.item(), "latent_loss_dyn_eval": latent_loss_dyn_eval.item()})
-
-                #if self.pixel_decoder_loss:
-                #x_t_hat_dec = net.dec(sigma_t, alpha)
-                #loss_dec_dyn = (vgg_loss_agg(self.vgg, x_t_hat_dec, x_tk_hat) - vgg_loss_agg(self.vgg, x_t, x_tk)) ** 2
-                # loss_dec_dyn = []
-                # for n in range(seq_len - 1):
-                #     loss_dec_dyn_tn = pixel_dynamics_loss(x_seq_gt[:, n], x_seq_gt[:, n + 1], rec_imgs[:,n], x_seq_hat[:, n + 1])
-                #     loss_dec_dyn.append(loss_dec_dyn_tn)
-                # loss_dec_dyn = torch.stack(loss_dec_dyn, dim=0).mean()
-                # out_dict.update({"pixel_loss_dec_eval": loss_dec_dyn.item()})
-
 
                 # compute metrics
                 ssim_t = ssim_lightning(x_t, x_t_hat)
@@ -698,9 +671,6 @@ class FixedLengthModel(Experiment):
             def temp_disc_stuff(engine):
                 gan_trainer_temp.disc_scheduler.step()
 
-        # # if self.pixel_decoder_loss:
-        # Average(output_transform=lambda x: x["pixel_loss_dec"]).attach(trainer, "pixel_loss_dec-epoch_avg")
-        # Average(output_transform=lambda x: x["pixel_loss_dec_eval"]).attach(evaluator, "pixel_loss_dec_eval")
 
         # evaluation losses
         Average(output_transform=lambda x: x["vgg_loss_dyn_eval"]).attach(evaluator, "vgg_loss_dyn_eval")

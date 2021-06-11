@@ -61,7 +61,7 @@ if __name__ == '__main__':
     parser.add_argument("-c", "--config", type=str,
                         default="config/latent_flow_net.yaml",
                         help="Define config file")
-    parser.add_argument('-p''--project_name',type=str,default='ii2v',help='unique name for the training run to be (re-)started.')
+    parser.add_argument('-p','--project_name',type=str,default='ii2v',help='unique name for the training run to be (re-)started.')
     parser.add_argument("-r","--restart", default=False,action="store_true",help="Whether training should be resumed.")
     parser.add_argument("-d", "--debug", default=False, action="store_true", help="Whether training should be resumed.")
     parser.add_argument("--gpu",default=[0], type=int,
@@ -76,7 +76,7 @@ if __name__ == '__main__':
     config, structure, restart = load_parameters(args.config, args.restart or args.mode == "test",args.debug,args.project_name)
     config["general"]["restart"] = restart
     config["general"]["mode"] = args.mode
-    config["general"]["first_stage"] = args.first_stage
+    # config["general"]["first_stage"] = args.first_stage
 
     if len(args.gpu) == 1:
         gpus = torch.device(
@@ -93,7 +93,6 @@ if __name__ == '__main__':
     if mode == "test" and "testing" in config and "metrics_on_patches" in config["testing"]:
         config["testing"]["metrics_on_patches"] = args.metrics_on_patches
 
-    config["testing"].update({"all_ckpts": args.all_ckpt})
     experiment = select_experiment(config, structure, gpus)
 
     # start selected experiment

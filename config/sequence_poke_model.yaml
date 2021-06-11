@@ -5,13 +5,14 @@ general:
   # whether to start the training/testing run in debug mode
   debug: False
   # if project name is already existing and not restart_from_checkpoint or infer, then an error is thrown
-  project_name: plants-deep-maxf8-bs8-skip-64-mins16-com_tmp_disc #plants-deep-maxf13-bs6-skip-128-mins16-common_tmp_disc_gp.1   # plants-deep-maxf8-bs3-skip-64-mins8-com_tmp_disc
+  #project_name: plants-deep-maxf8-bs8-skip-64-mins16-com_tmp_disc #plants-deep-maxf13-bs6-skip-128-mins16-common_tmp_disc_gp.1   # plants-deep-maxf8-bs3-skip-64-mins8-com_tmp_disc
   experiment: sequence_poke_model
   seed: 42
 
 data:
-  dataset: PlantDataset
-  spatial_size: !!python/tuple [64,64]
+  dataset: IperDataset
+  datapath: /export/scratch/compvis/datasets/iPER/processed_256_resized
+  spatial_size: !!python/tuple [128,128]
   poke_size: 5
   n_pokes: 1
   # whether to split after videos or randomly (in a reproducible way)
@@ -43,7 +44,7 @@ data:
   flow_in_ram: False
   imgs_in_ram: False
   # sequence parameters
-  max_frames: 10
+  max_frames: 9
   var_sequence_length: True
   object_weighting: True
   include_zeropoke: True
@@ -51,21 +52,21 @@ data:
   weight_zeropoke: True
   equal_poke_val: True
   # option to separately weigh the sequence with longest length, as otherwise, the model is biased towards favoring small sequence lengths
-  longest_seq_weight: 10
+  longest_seq_weight: 20
 
 
 
 training:
   n_epochs: 1000
   lr: 0.0001
-  batch_size: 12
+  batch_size: 8
   lr_reduce: 0.3
   # gets multiplicated with n_epochs
   tau: [0.2,0.45,0.7]   #1. means no schedule
   #weight_decay: 0.
   # weight for the dynamics regularizer
   pixel_dynamics_vgg: False
-  latent_dynamics_weight: 50.
+  latent_dynamics_weight: 5.
   pixel_dynamics_weight: 0.
   pixel_dyn_spatial: True
   vgg_dyn_weight: 5.
@@ -81,7 +82,7 @@ training:
 
 architecture:
   nf_first: 32
-  nf_deep: 256
+  nf_deep: 512
   min_spatial_size: 16
   zeroflow_baseline: False
   # if adain is used, the decoder is fed the appearance representation via ADAIN
@@ -91,7 +92,7 @@ architecture:
   # only enable if adain is used
   resnet_down: True
   # whether to apply skip connection
-  use_skip_model: False
+  use_skip_model: True
   poke_every_t: True
   spectnorm_decoder: False
   dynamics_var: False
@@ -120,7 +121,7 @@ gan_temp:
   gen_weight: 1
   bce_loss: False
   start_iteration: 4000 #8000
-  patch_temp_disc: False
+  patch_temp_disc: True
   num_classes: 1
   conditional: False
   base_norm_spade: instance
@@ -137,7 +138,7 @@ testing:
   test_it: 4
   eval_app_transfer: False
   # computes metrics on patches, if patches are available for the selected dataset
-  metrics_on_patches: True
+  metrics_on_patches: False
 
   # evaluation
   n_examples_noise: 10
