@@ -1,0 +1,13 @@
+raw_dir: ''
+processed_dir: ''
+rgb_max: 1.0
+fp16_scale: 1024.0
+flow_delta: 20
+flow_max: 20
+mode: all # should be in [all, extract, prepare]
+video_format: mp4
+spatial_size: 256
+input_size: 1024
+frames_discr: 1
+target_gpus: 0
+num_workers: 1

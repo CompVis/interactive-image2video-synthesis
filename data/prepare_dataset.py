@@ -1,20 +1,18 @@
 import os
 import cv2
-from copy import deepcopy
 import argparse
 import torch
 import numpy as np
-from os import path, makedirs, listdir
+from os import path, makedirs
 import pickle
 from tqdm import tqdm
-import imagesize
 from glob import glob
 from natsort import natsorted
 import yaml
 import multiprocessing as mp
 from multiprocessing import Process
 from functools import partial
-
+from collections import namedtuple
 
 h36m_aname2aid = {name: i for i, name in enumerate(["Directions","Discussion","Eating","Greeting","Phoning",
                                                     "Posing","Purchases","Sitting","SittingDown","Smoking",
@@ -726,64 +724,22 @@ if __name__ == "__main__":
 
 
 
-
     parser = argparse.ArgumentParser()
-    parser.add_argument("--process_vids","-pv",default=False,action="store_true",help="Whether to process videos (true) or images (false).")
-    parser.add_argument("--rgb_max", type=float, default=1.0)
-    parser.add_argument(
-        "--fp16",
-        action="store_true",
-        help="Run model in pseudo-fp16 mode (fp16 storage fp32 math).",
-    )
-    parser.add_argument(
-        "--fp16_scale",
-        type=float,
-        default=1024.0,
-        help="Loss scaling, positive power of 2 values can improve fp16 convergence.",
-    )
-    parser.add_argument(
-        "--raw_dir",
-        "-v",
-        type=str,
-        default="/export/data/ablattma/Datasets/plants/cropped/",
-    )
-    parser.add_argument(
-        "--processed_dir",
-        "-p",
-        type=str,
-        default="/export/scratch/ablattma/Datasets/plants/processed_256/",
-    )
-    parser.add_argument(
-        "--flow_delta",
-        "-fd",
-        type=int,
-        default=5,
-        help="The number of frames between two subsequently extracted flows.",
-    )
-    parser.add_argument("--flow_max", "-fm", type=int, default=10)
-    parser.add_argument(
-        "--mode", type=str, choices=["all", "extract", "prepare"], default="all"
-    )
-    # parser.add_argument(
-    #     "--check_imgs",
-    #     "-ci",
-    #     type=bool,
-    #     default=False,
-    #     help="Whether to check the images for their size or not (more time consumpting, if enabled).",
-    # )
-    # parser.add_argument("--meta_file_name","-mfn",type=str,default="meta_data", help="The name for the pickle file, where the meta data is stored (without ending).")
-    parser.add_argument("--video_format", "-vf", type=str, default="mkv", choices=["mkv","mp4"],help="Format of the input videos to the pipeline.")
-    parser.add_argument("--spatial_size", "-s",type=int, default=256,help="The desired spatial_size of the output.")
-    # parser.add_argument("--image_prefix", "-ip", type=str,default = "_", help="The prefix to the images.")
-    parser.add_argument("--input_size", "-is", type=int, default=1024, help="The input size for the flownet (images are resized to this size, if not divisible by 64.")
-    # parser.add_argument("--resave_imgs","-ri",action="store_true",default=False,help="Whether to re-save the resized images when processing images instead of videos (default: False).")
-    parser.add_argument("--frames_discr", "-fdi", type=int, default=1, help="The discretization step for images to take from the source img dir.")
-    parser.add_argument("--target_gpus", default=[], type=int,
-                        nargs="+", help="GPU's to use.")
-    parser.add_argument("--num_workers","-nw",type=int, default=1,help="The number of parallel processes that will be started for etxracting the data.")
-    parser.add_argument("--use_mp",action="store_true", default=False, help="Whether to use mp or not.")
-    parser.add_argument("--continuous",action="store_true", default=False, help="(Only applicable when using pre-extracted images) Whether ")
-    args = parser.parse_args()
+
+    parser.add_argument('-c', '--config',type=str,required=True,help='Config file containing all parameters.')
+    config_args = parser.parse_args()
+
+    with open(config_args.config,'r') as f:
+        args = yaml.load(f,Loader=yaml.FullLoader)
+
+    args = namedtuple('Args',args.keys())(*args.values())
+
+
+    if args.raw_dir == '':
+        raise ValueError(f'The data holding directory is currently not defined. please define the field "raw_dir" in  "{config_args.config}"')
+
+    if args.processed_dir == '':
+        raise ValueError(f'The target directory for the extracted image frames and flow maps is currently undefined. Please define the field "processed_dir" in  "{config_args.config}"')
 
     pool = []
     torch.multiprocessing.set_start_method("spawn")
