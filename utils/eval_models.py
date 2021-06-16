@@ -9,7 +9,7 @@ from experiments import select_experiment
 
 def create_dir_structure(model_name, experiment):
     subdirs = ["ckpt", "config", "generated", "log"]
-    structure = {subdir: path.join("/export/scratch3/ablattma/visual_poking/",experiment,subdir,model_name) for subdir in subdirs}
+    structure = {subdir: path.join("/export/scratch/ablattma/visual_poking/",experiment,subdir,model_name) for subdir in subdirs}
     if "DATAPATH" in os.environ:
         structure = {subdir: os.environ["DATAPATH"] +structure[subdir] for subdir in structure}
     return structure

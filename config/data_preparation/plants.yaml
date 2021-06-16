@@ -1,5 +1,5 @@
-raw_dir: ''
-processed_dir: ''
+raw_dir: '/export/scratch/compvis/datasets/plants/cropped_complete'
+processed_dir: '/export/scratch/ablattma/datasets/plants'
 rgb_max: 1.0
 fp16_scale: 1024.0
 flow_delta: 10
@@ -9,5 +9,5 @@ video_format: mkv
 spatial_size: 256
 input_size: 1024
 frames_discr: 1
-target_gpus: 0
+target_gpus: 9
 num_workers: 1

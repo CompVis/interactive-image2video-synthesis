@@ -1,7 +1,7 @@
 # Here goes all training information and the required parameters; this file can be filled propperly and renamed
 general:
   # add base directory: here'll go all the logs and training info about the run
-  base_dir: "/export/scratch3/ablattma/visual_poking/"
+  base_dir: "/export/scratch/ablattma/visual_poking/"
   # whether to start the training/testing run in debug mode
   # if project name is already existing and not restart_from_checkpoint or infer, then an error is thrown
   project_name: test_iper_official_code
@@ -10,8 +10,8 @@ general:
   seed: 42
 
 data:
-  dataset: PlantDataset
-  datapath: /export/scratch/compvis/datasets/plants/processed_256_resized # the path were the data is stored for the respective dataset
+  dataset: IperDataset
+  datapath: /export/scratch/ablattma/datasets/iPER # the path were the data is stored for the respective dataset
   spatial_size: !!python/tuple [64,64]
   poke_size: 3
   n_pokes: 1

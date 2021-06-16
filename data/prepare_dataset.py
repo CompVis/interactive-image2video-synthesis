@@ -12,7 +12,7 @@ import yaml
 import multiprocessing as mp
 from multiprocessing import Process
 from functools import partial
-from collections import namedtuple
+from dotmap import DotMap
 
 h36m_aname2aid = {name: i for i, name in enumerate(["Directions","Discussion","Eating","Greeting","Phoning",
                                                     "Posing","Purchases","Sitting","SittingDown","Smoking",
@@ -487,14 +487,6 @@ def prepare(args):
                 diff = max_flow_length-len(flows_rel)
                 [flows_rel.insert(len(flows_rel),last_flow_paths[len(flows_rel)]) for _ in range(diff)]
 
-
-            # if args.check_imgs:
-            #     w_img, h_img = imagesize.get(img_path)
-            #     if len(flows) > 0:
-            #         h_f, w_f = np.load(flows[0]).shape[:2]
-            #     else:
-            #         h_f = w_f = None
-            # else:
             w_img = args.spatial_size
             h_img = args.spatial_size
             if len(flows) > 0:
@@ -522,190 +514,6 @@ def prepare(args):
 
             last_flow_paths = flows_rel
 
-    # else:
-    #
-    #     basedir_name = args.raw_dir.split("*", 1)[0] if "*" in args.raw_dir else "/".join(args.raw_dir.split("/")[:-1])
-    #     split_prefix = args.image_prefix if args.image_prefix != "" else "_"
-    #
-    #     if train_test_split:
-    #         datadict.update({"train":[]})
-    #
-    #     # if args.resave_imgs:
-    #     #     subdirs = glob(args.raw_dir)[0].split(basedir_name)[-1].split("/")
-    #     #     n_subdirs = len(subdirs)
-    #     #     data_dirs = [d for d in glob(path.join(args.processed_dir, *["*" for n in range(n_subdirs)])) if path.isdir(d)]
-    #     #
-    #     #
-    #     #     fid = 0
-    #     #     for vid, dir_name in enumerate(data_dirs):
-    #     #         images = natsorted(glob(path.join(dir_name, "*.png")))
-    #     #         action_id = actor_id = None
-    #     #
-    #     #         # [1:] to remove leading "/"
-    #     #         dir_name_rel = dir_name.split(args.processed_dir)[-1]
-    #     #
-    #     #         #logger.info(f"Processing images and flows in directory \"{dir_name_rel}\".")
-    #     #
-    #     #         if dir_name_rel.startswith("/"):
-    #     #             dir_name_rel = dir_name_rel[1:]
-    #     #
-    #     #         if "human3.6M" in args.processed_dir.split("/")  and dir_name_rel.split("/")[1].startswith("-"):
-    #     #             logger.info(f"Skipping {dir_name_rel}")
-    #     #             continue
-    #     #
-    #     #
-    #     #
-    #     #         if "human36m" in args.processed_dir.split("/"):
-    #     #             object_id = int(dir_name_rel.split("/")[0][1:])
-    #     #             actor_id = object_id
-    #     #             action_id = h36m_aname2aid[dir_name_rel.split("/")[1][:-2]]
-    #     #         elif "human3.6M" in args.processed_dir.split("/"):
-    #     #             object_id = int(dir_name_rel.split("/")[1].split("-")[0][1:])
-    #     #             actor_id = object_id
-    #     #             astring = dir_name_rel.split("/")[1].split("-")[1].split(".")[0]
-    #     #             if "_" in astring:
-    #     #                 astring=astring.split("_")[0]
-    #     #             action_id = h36m_aname2aid[astring]
-    #     #         elif "plants" in args.processed_dir.split("/"):
-    #     #             object_id = int(dir_name_rel.split("/")[-1].split("_")[1])
-    #     #         elif "iPER" in args.processed_dir.split("/"):
-    #     #             object_id = 100 * int(dir_name.split("/")[-1].split("_")[0]) + int(dir_name.split("/")[-1].split("_")[1])
-    #     #             actor_id = int(dir_name.split("/")[-1].split("_")[0])
-    #     #             action_id = int(dir_name.split("/")[-1].split("_")[-1])
-    #     #         else:
-    #     #             raise ValueError(f"Invalid image dataset with processed_dir \"{args.processed_dir}\".")
-    #     #
-    #     #         for i, img_p in enumerate(tqdm(images[::args.frames_discr],desc=f"Processing images and flows in directory \"{dir_name}\".")):
-    #     #             img_filename = img_p.split("/")[-1]
-    #     #             target_fid = int(img_filename.split(args.image_prefix)[-1].split(".")[0])
-    #     #             img_name_rel = path.join(dir_name_rel,img_filename)
-    #     #             if img_name_rel.startswith("/"):
-    #     #                 img_name_rel = img_name_rel[1:]
-    #     #
-    #     #             # fid = int(img_filename.split("frame_")[-1].split(".")[0])
-    #     #             flow_names = natsorted(glob(path.join(dir_name,f"prediction_{target_fid}_*.npy")))
-    #     #             flow_names_rel = [fname.split(args.processed_dir)[-1] for fname in flow_names]
-    #     #             flow_names_rel = [fname[1:] if fname.startswith("/") else fname for fname in flow_names_rel ]
-    #     #
-    #     #             if len(flow_names_rel) < max_flow_length:
-    #     #                 continue
-    #     #
-    #     #             h = w = args.spatial_size
-    #     #
-    #     #             if train_test_split:
-    #     #                 train = "train" in dir_name_rel
-    #     #                 datadict["train"].append(train)
-    #     #
-    #     #             datadict["img_path"].append(img_name_rel)
-    #     #             datadict["flow_paths"].append(flow_names_rel)
-    #     #             datadict["fid"].append(fid)
-    #     #             datadict["vid"].append(vid)
-    #     #             # image size compliant with numpy and torch
-    #     #             datadict["img_size"].append((1024, 1024))
-    #     #             datadict["flow_size"].append((h, w))
-    #     #             datadict["object_id"].append(object_id)
-    #     #             if action_id is not None:
-    #     #                 datadict["action_id"].append(action_id)
-    #     #             if actor_id is not None:
-    #     #                 datadict["actor_id"].append(actor_id)
-    #     #
-    #     #             fid += 1
-    #     #
-    #     #     # ensure that fids are 0-based
-    #     #     vid_arr = np.asarray(datadict["vid"])
-    #     #     fid_arr = np.asarray(datadict["fid"])
-    #     #     # sorting vids in unique does not affect order since vids are sorted anyways
-    #     #     for vid in np.unique(vid_arr):
-    #     #         min_fid = np.amin(fid_arr[vid_arr==vid])
-    #     #         fid_arr[vid_arr==vid]-= min_fid
-    #     #
-    #     #     datadict["fid"] = fid_arr.tolist()
-    #     #
-    #     #
-    #     # else:
-    #
-    #     actual_oid = 0
-    #     target_lags = None
-    #     img_p_rel = False
-    #     if train_test_split:
-    #         datadict.update({"train": []})
-    #         if "taichi" in args.processed_dir.split("/"):
-    #             oname2oid = {}
-    #             del datadict["max_fid"]
-    #             img_p_rel = True
-    #             target_lags = [10,20]
-    #         else:
-    #             raise NotImplementedError()
-    #
-    #     for vid,img_dir in enumerate(glob(args.raw_dir)):
-    #
-    #         action_id = actor_id = train = None
-    #         if "human36m" in args.processed_dir.split("/"):
-    #             object_id = int(img_dir.split(basedir_name)[-1].split("/")[0][1:])
-    #             actor_id = object_id
-    #             action_id = h36m_aname2aid[img_dir.split(basedir_name)[-1].split("/")[1][:-2]]
-    #         elif "sky" in args.processed_dir.split("/"):
-    #             object_id = vid
-    #         elif train_test_split:
-    #             train = "train" == img_dir.split("/")[-2]
-    #             msg = "train" if train else "test"
-    #             print(f"Video in {msg}-split")
-    #             if "taichi" in args.processed_dir.split("/"):
-    #                 obj_name = img_dir.split("/")[-1].split("#")[0]
-    #                 if obj_name in oname2oid.keys():
-    #                     object_id = oname2oid[obj_name]
-    #                 else:
-    #                     object_id = actual_oid
-    #                     oname2oid.update({obj_name: actual_oid})
-    #                     actual_oid += 1
-    #         else:
-    #
-    #             raise ValueError(f"Invalid image dataset with processed_dir \"{args.processed_dir}\".")
-    #         subdir_name = img_dir.split(basedir_name)[-1]
-    #         flow_dir = path.join(args.processed_dir,subdir_name)
-    #
-    #         for fid,img_p in enumerate(tqdm(natsorted([n for n in glob(path.join(img_dir,f"*.{args.image_format}")) if n.split("/")[-1].startswith(args.image_prefix)]),
-    #                                         desc=f"processing images in directory \"{img_dir}\"")):
-    #
-    #             actual_id = img_p.split(split_prefix)[-1].split(f".{args.image_format}")[0]
-    #             first_id = int(actual_id)
-    #             flow_ps_rel = [p.split(args.processed_dir)[-1] for p in natsorted(glob(path.join(flow_dir, f"prediction_{first_id}_*.npy")))]
-    #             if target_lags is not None:
-    #                 flow_ps_rel = [p for p in flow_ps_rel if int(p.split("_")[-1].split(".")[0])-int(p.split("_")[-2]) in target_lags]
-    #                 if len(flow_ps_rel) != len(target_lags):
-    #                     continue
-    #
-    #             if img_p_rel:
-    #                 img_path_rel = img_p.split(args.processed_dir)[-1]
-    #             else:
-    #                 img_path_rel = img_p
-    #
-    #             if len(flow_ps_rel) <max_flow_length:
-    #                 continue
-    #
-    #             w_img, h_img = imagesize.get(img_p)
-    #             img_p = img_path_rel
-    #             if len(flow_ps_rel) > 0:
-    #                 w_f = args.spatial_size
-    #                 h_f = args.spatial_size
-    #             else:
-    #                 h_f = w_f = None
-    #
-    #             datadict["img_path"].append(img_p)
-    #             datadict["flow_paths"].append(flow_ps_rel)
-    #             datadict["fid"].append(fid)
-    #             datadict["vid"].append(vid)
-    #             # image size compliant with numpy and torch
-    #             datadict["img_size"].append((h_img, w_img))
-    #             datadict["flow_size"].append((h_f, w_f))
-    #             datadict["object_id"].append(object_id)
-    #             if action_id is not None:
-    #                 datadict["action_id"].append(action_id)
-    #             if actor_id is not None:
-    #                 datadict["actor_id"].append(actor_id)
-    #             if train is not None:
-    #                 datadict["train"].append(train)
-
     logger.info(f'Prepared dataset consists of {len(datadict["img_path"])} samples.')
 
     # Store data (serialize)
@@ -729,10 +537,15 @@ if __name__ == "__main__":
     parser.add_argument('-c', '--config',type=str,required=True,help='Config file containing all parameters.')
     config_args = parser.parse_args()
 
-    with open(config_args.config,'r') as f:
+    fpath = path.dirname(path.realpath(__file__))
+    configfile = path.abspath(path.join(fpath,f'../{config_args.config}'))
+
+    with open(configfile,'r') as f:
         args = yaml.load(f,Loader=yaml.FullLoader)
 
-    args = namedtuple('Args',args.keys())(*args.values())
+    args = DotMap(args)
+
+
 
 
     if args.raw_dir == '':
@@ -743,8 +556,6 @@ if __name__ == "__main__":
 
     pool = []
     torch.multiprocessing.set_start_method("spawn")
-    if not args.process_vids:
-        semaphore = mp.Semaphore(args.num_workers)
 
     if args.mode == "extract":
         extract(args)

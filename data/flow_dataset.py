@@ -426,7 +426,7 @@ class IperDataset(PlantDataset):
 
 
         # self.datapath = "/export/scratch/compvis/datasets/iPER/processed_256_resized/"
-        self.metafilename = "meta_frange_kp_weights_nn"
+        self.metafilename = 'meta_frange_kp_weights_nn' #"test_codeprep_metadata"
 
         self.datadict.update({"actor_id": [], "action_id": []})
 
