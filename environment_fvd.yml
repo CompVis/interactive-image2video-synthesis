@@ -1,4 +1,4 @@
-name: poking
+name: fvd
 channels:
   - pytorch
   - conda-forge

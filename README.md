@@ -44,11 +44,29 @@ Since Flownet2 requires cuda-10.0 and is therefore not compatible with our main 
 ```shell script
 conda env create -f flownet2
 ```
+You can activate the environment and specify the right cuda version by using 
+
+```shell script
+source activate_flownet2
+``` 
+from the root of this repository. IMPORTANT: You have to ensure that lines 3 and 4 in the script add your respective ``cuda-10.0`` installation direcories to the ``PATH`` and ``LD_LIBRARY_PATH`` environment variables.
+Finally, you have to build the custom layers of flownet2 with
+
+```shell script
+cd models/flownet2
+bash install.sh -ccbin <PATH TO_GCC7>
+```
+, where ``<PATH TO_GCC7>`` is the path to your ``gcc-7``-binary, which is usually ``/usr/bin/gcc-7`` on a linux server. Make sure that your ``flownet2`` environment is activated and that the env-variables contain the ``cuda-10.0`` installation when running the script.
    
 
 ### Poking Plants ###
 
-Download Poking Plants dataset from [here](todo add link) and extract it to a ``<TARGETDIR>``, which then contains the raw video files. To estimate optical flow
+Download Poking Plants dataset from [here](todo add link) and extract it to a ``<TARGETDIR>``, which then contains the raw video files. To extract the individual frames and estimate optical flow, run
+
+````shell script
+source activate_flownet2
+python -m utils.prepare_dataset --config config/data_preparation/plants.yaml
+````
 
 ### iPER ###
 

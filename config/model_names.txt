@@ -39,11 +39,11 @@
 #h36m-fixed_length-bs9-128-ss8-mf10
 #taichi-fixed_length-512deep-mf10-bs9ss2-128
 #taichi-fixed_length-512deep-mf10-bs9ss2-genweight10.
-h36m-fixed_length-512deep-mf10-bs9-ss2-6-ps3-ll.1
-iper-fixed_length-512deep-mf10-bs9-ss1-128
-plants-fixed_length-bs8-64-ss1-mf10-wo_weight
-#taichi-fixed_length-512deep-mf10-bs9ss2-genweight10.
-taichi-fixed_length-512deep-mf10-bs9ss2-128
-h36m-fixed_length-bs9-128-ss8-mf10
-iper-fixed_length-512deep-mf9-bs8ss1
-plants-fixed_length-512deep-mf10-bs9-ss2-128
+#   h36m-fixed_length-512deep-mf10-bs9-ss2-6-ps3-ll.1
+#iper-fixed_length-512deep-mf10-bs9-ss1-128
+#plants-fixed_length-bs8-64-ss1-mf10-wo_weight
+taichi-fixed_length-512deep-mf10-bs9ss2-genweight10.
+#taichi-fixed_length-512deep-mf10-bs9ss2-128
+#h36m-fixed_length-bs9-128-ss8-mf10
+#iper-fixed_length-512deep-mf9-bs8ss1
+#plants-fixed_length-512deep-mf10-bs9-ss2-128

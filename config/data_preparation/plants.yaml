@@ -1,13 +1,13 @@
 raw_dir: '/export/scratch/compvis/datasets/plants/cropped_complete'
 processed_dir: '/export/scratch/ablattma/datasets/plants'
-rgb_max: 1.0
-fp16_scale: 1024.0
-flow_delta: 10
-flow_max: 30
+rgb_max: 1.0 # flownet2 parameter --> leave as is
+fp16_scale: 1024.0 # flownet2 parameter --> leave as is
+flow_max: 30 # maximum number of frames between which optical flow will be estimated
+flow_delta: 10 # discretization step for optical flow estimates so for this example, we would have 3 flow maps per image pair where for frame 0, it would be flow_0-->10, flow_0-->20 and flow_0-->30
 mode: all # should be in [all, extract, prepare]
 video_format: mkv
-spatial_size: 256
-input_size: 1024
+spatial_size: 256 # the output size of the images and flow maps
+input_size: 1024 # the input size for the flow estimator i.e. the spatial resolution of the processed videos
 frames_discr: 1
-target_gpus: 9
-num_workers: 1
+target_gpus: [1,3,5,6,7] # ids of the gpus, among which the processes will be devided
+num_workers: 10 # number of parallel-working optical flow estimators to process the data
