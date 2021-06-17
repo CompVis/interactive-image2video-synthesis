@@ -13,6 +13,12 @@ import multiprocessing as mp
 from multiprocessing import Process
 from functools import partial
 from dotmap import DotMap
+from torchvision import transforms as tt
+
+
+from utils.general import parallel_data_prefetch
+from data import get_dataset
+from data.helper_functions import preprocess_image
 
 h36m_aname2aid = {name: i for i, name in enumerate(["Directions","Discussion","Eating","Greeting","Phoning",
                                                     "Posing","Purchases","Sitting","SittingDown","Smoking",
@@ -314,6 +320,8 @@ def extract(args):
         args.raw_dir =path.join(args.raw_dir,'*')
     data_names = [p.split(base_dir)[-1] for p in glob(args.raw_dir) if p.endswith(args.video_format)]
 
+    # data_names = [d for d in data_names if d in ['/VID_0_5.mkv','/VID_7_0.mkv']]
+
 
 
     fn_extract = partial(process_video, args=args)
@@ -361,39 +369,6 @@ def extract(args):
         for p in processes:
             p.join()
         print(f"Prefetching complete. [{time.time() - start} sec.]")
-
-    # else:
-    #     data_names = [p for p in glob(args.raw_dir) if path.isdir(p)]
-    #
-    #     fn_extract = process_images
-    #
-    #     makedirs(args.processed_dir, exist_ok=True)
-    #     if args.use_mp:
-    #
-    #         # test_proc = deepcopy(args.processed_dir)
-    #
-    #         for name in data_names:
-    #             # img_list = natsorted([n for n in glob(path.join(name, f"*.{args.image_format}")) if n.split("/")[-1].startswith(args.image_prefix)])
-    #             # if deepcopy(basedir_name).replace("/", "") == test_proc.replace("/", ""):
-    #             #     flows = natsorted([n for n in glob(path.join(name, f"prediction_*.npy"))])
-    #             #     n_flow_per_img = int(args.flow_max / args.flow_delta)
-    #             #
-    #             #     if len(flows) > n_flow_per_img * float(len(img_list) - args.flow_max - 1) / args.frames_discr:
-    #             #         print(f"Skipping dir {name} as flows are already extracted")
-    #             #         continue
-    #
-    #
-    #             p = Process(target=fn_extract, args=(name, semaphore, args))
-    #             semaphore.acquire()
-    #             p.start()
-    #             pool.append(p)
-    #             time.sleep(5)
-    #
-    #         for th in pool:
-    #             th.join()
-    #     else:
-    #         for name in data_names:
-    #             fn_extract(name,None,args)
 
 def prepare(args):
     logger = get_logger("dataset_preparation")
@@ -524,6 +499,160 @@ def prepare(args):
         pickle.dump(datadict, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 
+def load_flow(flow_paths):
+    norms = []
+    for i, flow_path in enumerate(tqdm(flow_paths)):
+        # debug, this path seems to be erroneous
+        # flow_path = "/export/data/ablattma/Datasets/plants/processed_crops/VID_0_3_1024x1024/prediction_3_28.flow.npy"
+        try:
+            flow = np.load(flow_path)
+        except Exception as e:
+            print(e)
+            continue
+        n = np.linalg.norm(flow,2,0)
+        min_norm = np.amin(n)
+        max_norm = np.amax(n)
+        norms.append(np.stack([max_norm,min_norm]))
+
+    norms = np.stack(norms,0)
+    return norms
+
+def norms(cfg_dict):
+    cfg_dict['data']['normalize_flows'] = False
+
+    transforms = tt.Compose(
+        [tt.ToTensor(), tt.Lambda(lambda x: (x * 2.0) - 1.0)]
+    )
+
+    datakeys = ["flow", "images"]
+
+    dataset, _ = get_dataset(config=cfg_dict["data"])
+    test_dataset = dataset(transforms, datakeys, cfg_dict["data"], train=True)
+    print(test_dataset.__class__.__name__)
+    name = test_dataset.__class__.__name__
+
+    save_dir = f"test_data/{name}"
+    makedirs(save_dir, exist_ok=True)
+
+    flow_paths = test_dataset.data["flow_paths"]
+
+
+    stats_dict = {"max_norm": [], "min_norm": [], "percentiles": []}
+    for i in range(flow_paths.shape[-1]):
+        test_dataset.logger.info(f"Computing mean of flow with lag {(i + 1) * 5}")
+        norms = parallel_data_prefetch(load_flow, flow_paths[:, i], cfg_dict['data'][['num_workers']])
+
+        max_n = np.amax(norms[:, 0])
+        min_n = np.amin(norms[:, 1])
+        percs_at = list(range(10, 100, 10))
+        percs = np.percentile(norms[:, 0], percs_at)
+
+        stats_dict["percentiles"].append({pa: p for pa, p in zip(percs_at, percs)})
+        stats_dict["max_norm"].append(float(max_n))
+        stats_dict["min_norm"].append(float(min_n))
+
+    # save
+    if test_dataset.normalize_flows:
+        savepath = path.join(test_dataset.datapath, "dataset_stats.p")
+    else:
+        savepath = path.join(test_dataset.datapath, "dataset_stats_pixels.p")
+    with open(savepath, "wb") as handle:
+        pickle.dump(stats_dict, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+
+def stats(cfg_dict):
+
+    cfg_dict['data']['normalize_flows'] = True
+
+    transforms = tt.Compose(
+        [tt.ToTensor(), tt.Lambda(lambda x: (x * 2.0) - 1.0)]
+    )
+
+    datakeys = ["flow", "images"]
+
+    dataset, _ = get_dataset(config=cfg_dict["data"])
+    test_dataset = dataset(transforms, datakeys, cfg_dict["data"], train=True)
+    print(test_dataset.__class__.__name__)
+    name = test_dataset.__class__.__name__
+
+    save_dir = f"test_data/{name}"
+    makedirs(save_dir, exist_ok=True)
+
+    def process_flows(flow_data):
+        out = np.zeros((len(flow_data),3))
+
+        for i,dp in enumerate(tqdm(flow_data)):
+
+            flow = np.load(dp[0])
+            #flow = flow - test_dataset.flow_norms["min_norm"][test_dataset.valid_lags[0]]
+            flow = flow / test_dataset.flow_norms["max_norm"][test_dataset.valid_lags[0]]
+
+            img = cv2.imread(dp[1])
+            # image is read in BGR
+            img = preprocess_image(img, swap_channels=True)
+
+            mask = np.zeros(img.shape[:2], np.uint8)
+            # rect defines starting background area
+            if test_dataset.filter_flow:
+                rect = (
+                int(img.shape[1] / test_dataset.flow_width_factor), test_dataset.valid_h[0], int((test_dataset.flow_width_factor - 2) / test_dataset.flow_width_factor * img.shape[1]), test_dataset.valid_h[1] - test_dataset.valid_h[0])
+                # initialize background and foreground models
+                fgm = np.zeros((1, 65), dtype=np.float64)
+                bgm = np.zeros((1, 65), dtype=np.float64)
+                # apply grab cut algorithm
+                mask2, fgm, bgm = cv2.grabCut(img, mask, rect, fgm, bgm, 5, cv2.GC_INIT_WITH_RECT)
+
+            amplitude = np.linalg.norm(flow[:, test_dataset.valid_h[0]:test_dataset.valid_h[1], test_dataset.valid_w[0]:test_dataset.valid_w[1]],2,axis=0)
+
+            if test_dataset.filter_flow:
+                # only consider the part of the mask which corresponds to the region considered in flow
+                amplitude_filt = np.where(mask2[test_dataset.valid_h[0]:test_dataset.valid_h[1], test_dataset.valid_w[0]:test_dataset.valid_w[1]], amplitude, np.zeros_like(amplitude))
+            else:
+                amplitude_filt = amplitude
+
+            std = amplitude_filt.std()
+
+            mean = np.mean(amplitude_filt)
+
+            indices = np.argwhere(np.greater(amplitude_filt, mean + (std * 2.0)))
+            if indices.shape[0] == 0:
+                indices = np.argwhere(np.greater(amplitude_filt, np.mean(amplitude_filt) + amplitude_filt.std()))
+                if indices.shape[0] == 0:
+                    print("Fallback in Dataloading bacause no values remain after filtering.")
+                    # there should be at least one element that is above the mean if flows are not entirely equally distributed
+                    indices = np.argwhere(np.greater(amplitude_filt, mean))
+                    if indices.shape[0] == 0:
+                        print("strange case, cannot occure, skip")
+                        out[i, -1] = 1
+                        continue
+
+            values = np.asarray([amplitude_filt[idx[0], idx[1]] for idx in indices])
+            out[i, 0] = values.min()
+            out[i, 1] = values.max()
+
+
+        return out
+
+    in_data = [(f,i) for f,i in zip(test_dataset.data["flow_paths"][:,test_dataset.valid_lags[0]],test_dataset.data["img_path"])]
+    out_data = parallel_data_prefetch(process_flows,in_data, n_proc=80, cpu_intensive=True, target_data_type="list")
+
+
+
+    with open(path.join(test_dataset.datapath,f"{test_dataset.metafilename}.p"),"rb") as f:
+        datadict = pickle.load(f)
+
+
+    #assert out_data.shape[0] == len(datadict["img_path"])
+    n_error = np.count_nonzero(out_data[:,2])
+
+    print(f"While loading the data, {n_error} errors occurred.")
+    key = "flow_range"
+    name_key = "frange"
+
+    datadict.update({key: out_data})
+    with open(path.join(test_dataset.datapath, f"{test_dataset.metafilename}_{name_key}.p"), "wb") as f:
+        pickle.dump(datadict, f, protocol=pickle.HIGHEST_PROTOCOL)
+
 
 if __name__ == "__main__":
 
@@ -542,9 +671,12 @@ if __name__ == "__main__":
 
     with open(configfile,'r') as f:
         args = yaml.load(f,Loader=yaml.FullLoader)
+        cfg_dict = args
 
     args = DotMap(args)
 
+
+    cfg_dict['data']['datapath'] = args.processed_dir
 
 
 
@@ -564,3 +696,5 @@ if __name__ == "__main__":
     else:
         extract(args)
         prepare(args)
+        norms(cfg_dict)
+

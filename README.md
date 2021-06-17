@@ -61,13 +61,14 @@ bash install.sh -ccbin <PATH TO_GCC7>
 
 ### Poking Plants ###
 
-Download Poking Plants dataset from [here](todo add link) and extract it to a ``<TARGETDIR>``, which then contains the raw video files. To extract the individual frames and estimate optical flow, run
+Download Poking Plants dataset from [here](todo add link) and extract it to a ``<TARGETDIR>``, which then contains the raw video files. To extract the individual frames and estimate optical flow set the value field 
+``raw_dir`` in ``config/data_preparation/plants.yaml`` to be ``<TARGETDIR>``, define the target location for the extracted frames (, where all frames of each video will be within a unique directory) via the field ``processed_dir`` and run
 
 ````shell script
 source activate_flownet2
 python -m utils.prepare_dataset --config config/data_preparation/plants.yaml
 ````
-
+By defining the number of parallel runs of flownet2, which will be distributed among the gpus with the ids specified in ``target_gpus``, with the ``num_workers``-argument, you can significantly speed up the optical flow estimation.  
 ### iPER ###
 
 ### Human3.6m ###
