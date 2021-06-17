@@ -7,8 +7,8 @@
 [Björn Ommer](https://hci.iwr.uni-heidelberg.de/Staff/bommer),
 [CVPR 2021](http://cvpr2021.thecvf.com/)<br/>
 
-[**Project page**](https://compvis.github.io/interactive-image2video-synthesis/)
+[**Project page**](https://compvis.github.io/interactive-image2video-synthesis/) | [**Paper**](https://openaccess.thecvf.com/content/CVPR2021/papers/Blattmann_Understanding_Object_Dynamics_for_Interactive_Image-to-Video_Synthesis_CVPR_2021_paper.pdf) |  [**BibTeX**](paper/paper.bib)
 
 ![teaser](images/overview.png "Overview over our model.")
 
-Code and paper coming soon ....
+Code coming soon ....
