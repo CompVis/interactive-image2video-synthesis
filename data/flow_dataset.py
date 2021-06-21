@@ -91,7 +91,6 @@ class PlantDataset(BaseDataset):
             # reset valid_lags, such that always the right flow which corresponds to the respective sequence length, is chosen
             if not self.__class__.__name__ == "Human36mDataset":
                 available_frame_nrs = np.asarray([int(p.split("/")[-1].split(".")[0].split("_")[-1]) - int(p.split("/")[-1].split(".")[0].split("_")[-2])  for p in self.data["flow_paths"][0]])
-                # fixme this will not work when intending to train oscillator on bair
                 if "n_ref_frames" not in self.config:
                     assert self.max_frames * self.subsample_step in available_frame_nrs
                     right_lag = int(np.argwhere(available_frame_nrs == self.max_frames * self.subsample_step))
@@ -155,7 +154,7 @@ class PlantDataset(BaseDataset):
         self.seq_len_T_chunk.update({self.max_frames: self.flow_cutoff})
         if self.var_sequence_length:
             if "flow_range" in self.datadict.keys():
-                self.ids_per_seq_len = {length: np.flatnonzero(np.logical_and(np.logical_and(self.datadict["flow_range"][:,1]>self.seq_len_T_chunk[length],
+                self.ids_per_seq_len = {length: np.flatnonzero(np.logical_and(np.logical_and(self.datadict["flow_range"][:,1,self.valid_lags[0]]>self.seq_len_T_chunk[length],
                                                                                              np.less_equal(np.arange(self.datadict["img_path"].shape[0]) +
                                                                                                            (self.min_frames + length)*self.subsample_step + 1,
                                                                                                             self.datadict["seq_end_id"])),
@@ -210,7 +209,7 @@ class PlantDataset(BaseDataset):
     def _set_instance_specific_values(self):
         # set flow cutoff to 0.2 as this seems to be a good heuristic for Plants
 
-        self.valid_lags = [1]
+        self.valid_lags = [0]
         self.flow_cutoff = 0.4
         self.extended_annotations = False
         self.subsample_step = 2
@@ -219,8 +218,8 @@ class PlantDataset(BaseDataset):
 
         if not 8 in self.excluded_objects:
             self.excluded_objects.append(8)
-        self.metafilename = "plants_256_resized_frange"
-
+        self.metafilename = "meta"
+        # self.metafilename = 'test_codeprep_metadata'
 
     def _read_flows(self,data):
         read_flows = []
@@ -321,35 +320,6 @@ class PlantDataset(BaseDataset):
 
         return split_data, train_indices, test_indices
 
-
-    def __len__(self):
-        return self.datadict["img_path"].shape[0]
-
-
-# class UIDummyDataset(PlantDataset):
-#
-#     def _set_instance_specific_values(self):
-#         self.valid_lags = [1]
-#         self.flow_cutoff = 0.4
-#         self.extended_annotations = False
-#         self.subsample_step = 1
-#         self.min_frames = 1
-#         self.max_frame = 1
-#
-#         fpath = path.dirname(path.realpath(__file__))
-#         self.metafilename = "dummy_dataset_frange"
-#         self.datapath = path.abspath(path.join(fpath, "../UI/DummyDataset"))
-#
-#     def _make_split(self,data):
-#
-#         train_ids = np.asarray(list(range(max(int(self.data["img_path"].shape[0]/10),1))))
-#         test_ids = np.asarray(list(range(max(int(self.data["img_path"].shape[0]/10),1),self.data["img_path"].shape[0])))
-#
-#         split_data = {"train": {key: data[key][train_ids] for key in data},
-#                       "test": {key: data[key][test_ids] for key in data}}
-#
-#         return split_data, train_ids, test_ids
-
 class VegetationDataset(PlantDataset):
 
     def _set_instance_specific_values(self):
@@ -359,7 +329,7 @@ class VegetationDataset(PlantDataset):
         self.min_frames = 5
         self.subsample_step = 2
         # self.datapath = "/export/data/ablattma/Datasets/vegetation_new/"
-        self.metafilename = "vegetation_new"
+        self.metafilename = "meta"
         self.datadict.update({"train": []})
         self.obj_weighting = True
         # set flow_weights to false
@@ -390,7 +360,7 @@ class TaichiDataset(VegetationDataset):
         self.min_frames = 5
         self.subsample_step = 2
         # self.datapath = "/export/scratch/compvis/datasets/taichi/taichi/"
-        self.metafilename = "meta_data_frange" if self.normalize_flows else "meta_with_10_20"
+        self.metafilename = 'meta'
         self.datadict.update({"train": []})
         self.obj_weighting = False
         # set flow_weights to false
@@ -408,7 +378,7 @@ class LargeVegetationDataset(VegetationDataset):
         self.min_frames = 5
         self.subsample_step = 2
         # self.datapath = "/export/scratch/compvis/datasets/plants/processed_256_resized/"
-        self.metafilename = "vegetation_large_meta_frange"
+        self.metafilename = "meta"
         self.datadict.update({"train": []})
         self.excluded_objects = [1,2,3]
         self.obj_weighting = True
@@ -426,7 +396,7 @@ class IperDataset(PlantDataset):
 
 
         # self.datapath = "/export/scratch/compvis/datasets/iPER/processed_256_resized/"
-        self.metafilename = 'meta_frange_kp_weights_nn' #"test_codeprep_metadata"
+        self.metafilename = 'meta' #"test_codeprep_metadata"
 
         self.datadict.update({"actor_id": [], "action_id": []})
 
@@ -525,7 +495,7 @@ class Human36mDataset(PlantDataset):
 
         # self.datapath = "/export/scratch/compvis/datasets/human3.6M/video_prediction"
 
-        self.metafilename = "h36_test_smaller"
+        self.metafilename = "meta"
         self.datadict.update({"actor_id": [], "action_id": [], "train": []})
 
         # set object weighting always to false

@@ -21,6 +21,7 @@ def load_parameters(config_name, restart,debug,project_name):
         cdict['general']['project_name'] = project_name
 
 
+
     dir_structure = create_dir_structure(cdict["general"])
     saved_config = path.join(dir_structure["config"], "config.yaml")
     if restart:

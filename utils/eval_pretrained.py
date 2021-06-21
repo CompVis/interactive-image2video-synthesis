@@ -7,16 +7,17 @@ from experiments import select_experiment
 
 
 
-def create_dir_structure(model_name, experiment, base_dir):
+def create_dir_structure(model_name, base_dir):
     subdirs = ["ckpt", "config", "generated", "log"]
-    structure = {subdir: path.join(base_dir,experiment,subdir,model_name) for subdir in subdirs}
+    structure = {subdir: path.join(base_dir,model_name, subdir) for subdir in subdirs}
+    [os.makedirs(structure[s],exist_ok=True) for s in structure]
     if "DATAPATH" in os.environ:
         structure = {subdir: os.environ["DATAPATH"] +structure[subdir] for subdir in structure}
     return structure
 
-def load_parameters(model_name,exp, base_dir):
+def load_parameters(model_name, base_dir):
 
-    dir_structure = create_dir_structure(model_name,exp, base_dir)
+    dir_structure = create_dir_structure(model_name, base_dir)
     saved_config = path.join(dir_structure["config"], "config.yaml")
 
     if path.isfile(saved_config):
@@ -30,11 +31,8 @@ def load_parameters(model_name,exp, base_dir):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("-e", "--experiment", type=str,
-                        default="fixed_length_model",
-                        help="Source directory.")
     parser.add_argument('-b', '--base_dir', required=True,
-                        type=str, help='the base directory, where all logs, configs, checkpoints and evaluation results are stored.')
+                        type=str, help='the base directory, where all logs, configs, checkpoints and evaluation results will be stored.')
     parser.add_argument("--gpu", type=int, required=True, help="The target device.")
     parser.add_argument("--mode", default="metrics", type=str, choices=["metrics", "fvd"],
                         help="The mode in which the test-method should be executed.")
@@ -55,7 +53,7 @@ if __name__ == '__main__':
         model = model.rstrip()
         print(f"Evaluate model : {model}")
 
-        cdict, dirs = load_parameters(model,args.experiment,args.base_dir)
+        cdict, dirs = load_parameters(model, args.base_dir)
 
         cdict["testing"].update({"mode":args.mode})
         cdict["general"]["mode"] = "test"

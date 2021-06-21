@@ -1,113 +1,143 @@
-# Copyright 2020 Mickael Chen, Edouard Delasalles, Jean-Yves Franceschi, Patrick Gallinari, Sylvain Lamprier
+#code heaviliy borrowed from https://github.com/anibali/h36m-fetch
 
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-
-#     http://www.apache.org/licenses/LICENSE-2.0
-
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+from subprocess import call
+from os import path, makedirs
+import hashlib
+from tqdm import tqdm
+import configparser
+import requests
+import tarfile
+from glob import glob
 
 
-import argparse
-import imageio
-import os
-import tqdm
-import cv2
-import numpy as np
+BASE_URL = 'http://vision.imar.ro/human3.6m/filebrowser.php'
 
-from PIL import Image
-
-
-# Subjects used for training and testing videos
-train_subjects = [1, 5, 6, 7, 8]
-test_subjects = [9, 11]
+subjects = [
+    ('S1', 1),
+    ('S5', 6),
+    ('S6', 7),
+    ('S7', 2),
+    ('S8', 3),
+    ('S9', 4),
+    ('S11', 5),
+]
 
 
-def generate_from_mp4(data_dir, image_size, train=True):
-    """
-    Preprocesses videos from the Human3.6M dataset in the input directory.
+def md5(filename):
+    hash_md5 = hashlib.md5()
+    with open(filename, 'rb') as f:
+        for chunk in iter(lambda: f.read(4096), b''):
+            hash_md5.update(chunk)
+    return hash_md5.hexdigest()
 
-    Processed videos are saved in the npz format and contain the following fields:
-        - `image`: uint8 NumPy array of dimensions (length, width, height, channels);
-        - `filename`: file name of the original video;
-        - `subject`: subject identifier of the subject in the video.
 
-    Parameters
-    ----------
-    data_dir : str
-        Directory where original videos are saved and processed videos will be saved.
-    image_size : int
-        Width and height of the processed images.
-    train : bool
-        Determines whether training or testing videos should be processed. Subjects used for training and testing
-        are determined by `train_subjects` and `test_subjects` defined in this file.
-    """
-    # Directory where the videos will be saved
-    save_dir = os.path.join(data_dir, 'train' if train else 'test')
-    # Create the directory if needed
-    if not os.path.exists(save_dir):
-        os.makedirs(save_dir)
+def download_file(url, dest_file, phpsessid):
+    call(['axel',
+          '-a',
+          '-n', '24',
+          '-H', 'COOKIE: PHPSESSID=' + phpsessid,
+          '-o', dest_file,
+          url])
 
-    # Subjects to preprocess
-    if train:
-        subjects = train_subjects
-    else:
-        subjects = test_subjects
+def get_config():
+    dirpath = path.dirname(path.realpath(__file__))
+    config = configparser.ConfigParser()
+    config.read(path.join(dirpath,'config.ini'))
+    return config
 
-    progress_bar = tqdm.tqdm(total=120 * len(subjects), ncols=0)
-    # Browse the list of subjects
-    for subject_id in subjects:
-        subject_dir = os.path.join(data_dir, f'S{subject_id}', 'Videos')
-        # Browse the list of videos of the subject
-        for video_file in os.listdir(subject_dir):
-            if video_file[0] == '_':
-                # If the video file name begins by `_ALL`, the video is ignored, as specified by authors of
-                # "Unsupervised learning of object structure and dynamics from videos" (NeurIPS 2018)
+
+def get_phpsessid(config):
+
+    try:
+        phpsessid = config['General']['PHPSESSID']
+    except (KeyError, configparser.NoSectionError):
+        print('Could not read PHPSESSID from `config.ini`.')
+        phpsessid = input('Enter PHPSESSID: ')
+    return phpsessid
+
+
+def verify_phpsessid(phpsessid):
+    requests.packages.urllib3.disable_warnings()
+    test_url = 'http://vision.imar.ro/human3.6m/filebrowser.php'
+    resp = requests.get(test_url, verify=False, cookies=dict(PHPSESSID=phpsessid))
+    fail_message = 'Failed to verify your PHPSESSID. Please ensure that you ' \
+                   'are currently logged in at http://vision.imar.ro/human3.6m/ ' \
+                   'and that you have copied the PHPSESSID cookie correctly.'
+    assert resp.url == test_url, fail_message
+
+
+def download_all(phpsessid, out_dir):
+    checksums = {}
+    dirpath = path.dirname(path.realpath(__file__))
+    with open(path.join(dirpath,'checksums.txt'), 'r') as f:
+        for line in f.read().splitlines(keepends=False):
+            v, k = line.split('  ')
+            checksums[k] = v
+
+    files = []
+    for subject_id, id in subjects:
+        files += [
+            ('Videos_{}.tgz'.format(subject_id),
+             'download=1&filepath=Videos&filename=SubjectSpecific_{}.tgz'.format(id)),
+        ]
+
+    # out_dir = 'video_download'
+    # makedirs(out_dir, exist_ok=True)
+
+    for filename, query in tqdm(files, ascii=True):
+        out_file = path.join(out_dir, filename)
+
+        if path.isfile(out_file):
+            continue
+
+        if path.isfile(out_file):
+            checksum = md5(out_file)
+            if checksums.get(out_file, None) == checksum:
                 continue
-                # Load video
-            video_path = os.path.join(subject_dir, video_file)
-            video = imageio.get_reader(video_path, 'ffmpeg')
-            # Crop, then resize (sequentially, not simultaneously), as specified by authors of
-            # "Unsupervised learning of object structure and dynamics from videos" (NeurIPS 2018)
 
-            # Save the processed video
-            video_file_name = os.path.splitext(video_file)[0]  # Remove extension
+        download_file(BASE_URL + '?' + query, out_file, phpsessid)
 
-            storage_dir = os.path.join(save_dir, f'S{subject_id}-{video_file_name.replace(" ", "_")}')
-            os.makedirs(storage_dir,exist_ok=True)
-            if os.path.isdir(storage_dir):
-                continue
-            for frame_nr,vid in enumerate(tqdm.tqdm(video.iter_data())):
-                vid = np.array(Image.fromarray(vid).crop((100, 100, 900, 900)).resize((image_size, image_size),resample=Image.LANCZOS))
-                vid = cv2.cvtColor(vid,cv2.COLOR_RGB2BGR)
-                cv2.imwrite(os.path.join(storage_dir,f"frame_{frame_nr}.png"),vid)
-            # np.savez(
-            #     os.path.join(save_dir, f'S{subject_id}-{video_file_name}'),
-            #     image=video_np, filename=video_file_name, subject=subject_id
-            # )
-            progress_bar.update()
+# https://stackoverflow.com/a/6718435
+def commonprefix(m):
+    s1 = min(m)
+    s2 = max(m)
+    for i, c in enumerate(s1):
+        if c != s2[i]:
+            return s1[:i]
+    return s1
+
+def extract_tgz(tgz_file, dest):
+    # if path.exists(dest):
+    #     return
+    with tarfile.open(tgz_file, 'r:gz') as tar:
+        members = [m for m in tar.getmembers() if m.isreg()]
+        member_dirs = [path.dirname(m.name).split(path.sep) for m in members]
+        base_path = path.sep.join(commonprefix(member_dirs))
+        for m in members:
+            m.name = path.relpath(m.name, base_path)
+        tar.extractall(dest)
+
+def extract(out_dir,tgzs):
+    out_dir = path.join(out_dir,'videos')
+
+    for tgz in tqdm(tgzs,desc='Extracting tgz archives'):
+        subject_id = tgz.split('_')[-1].split('.')[0]
+        videodir = path.join(out_dir,subject_id)
+        makedirs(videodir,exist_ok=True)
+
+        extract_tgz(tgz,videodir)
 
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        prog='Human3.6M preprocessing.',
-        description='Generates training and testing videos for the Human3.6M dataset from the original videos, and \
-                     stores them in folders `train` and `test` in the same directory as npz files.',
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter
-    )
-    parser.add_argument('--data_dir', type=str, metavar='DIR', required=True,
-                        help='Folder where videos from the original dataset are stored.')
-    parser.add_argument('--image_size', type=int, metavar='SIZE', default=64,
-                        help='Width and height of resulting processed videos.')
-    args = parser.parse_args()
+if __name__ == '__main__':
+    config = get_config()
+    phpsessid = get_phpsessid(config)
+    verify_phpsessid(phpsessid)
+    out_dir = config['General']['TARGETDIR']
+    download_dir = path.join(out_dir,'video_download')
+    makedirs(download_dir,exist_ok=True)
+    download_all(phpsessid,out_dir=download_dir)
+    tgzs = glob(path.join(download_dir,'*.tgz'))
+    extract(out_dir,tgzs)
 
-    print('Train sequences...')
-    generate_from_mp4(args.data_dir, args.image_size, train=True)
-    print(os.linesep)
-    print('Test sequences...')
-    generate_from_mp4(args.data_dir, args.image_size, train=False)
+
+

@@ -4,14 +4,14 @@ general:
   base_dir: "/export/scratch/ablattma/visual_poking/"
   # whether to start the training/testing run in debug mode
   # if project name is already existing and not restart_from_checkpoint or infer, then an error is thrown
-  project_name: test_iper_official_code
+  project_name: test
   # plants-fixed_length-bs10-64-ss1-mf10-baseline-1st_order #h36m-fixed_length-512deep-mf10-bs20-ss2-6-ps3-ll.1-gui_split-mask    #iper-fixed_length-512deep-mf9-bs8ss1 #h36m-fixed_length-512deep-mf10-bs20-ss2-6-ps3-ll.1-gui_split-mask #taichi-fixed_length-512deep-mf10-bs9ss2-128 #plants-fixed_length-very_deep-bs6-64-ss1-constforce-largegantmp      #plant-fixed_length-very_deep-bs6-64-ss1-mf10-baseline_wo_hier  #plants-fixed_length-very_deep-bs6-128-ss2-mf10-constforce-gantmp1.5    #plants-fixed_length-bs6-l16-64-ss2-nref5-debugexp-fiexedlensampler #plants-fixed_length-bs9-ss64-common_temp_disc  #plants-fixed_length-bs9-ss64-common_temp_disc-gp0.1 #iper-fixed_length-bs9-ss64-patch_temp_disc #iper-deep-fixed_length-10-deep # iper-maxf10-bs12-skip-64-ldl5-pdl0-vgg5-patchganorig_gp.0001-gantmpold.01gpfmap10-nopokeimg-snorm  #plants-maxf15-bs8-nodis-skip-64-baseline-ganstart1-fvd #plants-minf5-maxf25-bs10-dynskip-nodis-skip-64-pixel_dyn_mse #plants-minf5-maxf15-bs10-nodis-skip-64-gan-ps5 #plants-minf5-maxf15-bs10-dynskip-nodis-skip1-64-baseline-ps5    #-gan-fm1-gp0.01-gen1.5 #basic_poke_model-Iper-bs14-adain-mse-flow-ib
   experiment: fixed_length_model
   seed: 42
 
 data:
-  dataset: IperDataset
-  datapath: /export/scratch/ablattma/datasets/iPER # the path were the data is stored for the respective dataset
+  dataset: PlantDataset
+  datapath: /export/scratch/ablattma/datasets/plants # the path were the data is stored for the respective dataset
   spatial_size: !!python/tuple [64,64]
   poke_size: 3
   n_pokes: 1

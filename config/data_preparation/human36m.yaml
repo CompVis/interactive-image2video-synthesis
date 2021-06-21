@@ -1,13 +1,54 @@
-raw_dir: ''
-processed_dir: ''
+# note: raw_dir not necessited for the human36m dataset
+#raw_dir: '/export/scratch/ablattma/datasets/human36m/videos/*/*'
+processed_dir: '/export/scratch/ablattma/datasets/human36m/processed/'
 rgb_max: 1.0
 fp16_scale: 1024.0
-flow_delta: 10
+flow_delta: 5
 flow_max: 10
-mode: all # should be in [all, extract, prepare]
+mode: prepare # should be in [all, extract, prepare]
 video_format: mp4
 spatial_size: 256
 input_size: 1024
 frames_discr: 8
-target_gpus: 0
-num_workers: 1
+target_gpus: [0]
+num_workers: 12
+
+data:
+  dataset: Human36mDataset
+  spatial_size: !!python/tuple [64,64]
+  poke_size: 3
+  n_pokes: 1
+  # whether to split after videos or randomly (in a reproducible way)
+  split: gui #official
+  num_workers: 20
+  excluded_objects: [] # for iper leave empty, for plants, use [8]
+  # list containing the lags, curren6l, its indices are allowed to be within the intervall [0,5], otherwise, an error is throw
+  # can be in [image, video]
+  yield_videos: True
+  # augmentation parameters for color transformations
+  p_col: 0.8
+  p_geom: 0.8
+  augment_b: 0.4
+  augment_c: 0.5
+  augment_h: 0.15
+  augment_s: 0.4
+  # augmentation parameters for geometric transformations
+  aug_deg: 15 # for iper use 0, for plants use 30°
+  # translation is (vertical, horizontal)
+  aug_trans: !!python/tuple [0.1,0.1] # for iper use [0.1,0.6], for plants use [0.1,0.1]
+  # whether to get flow weight
+  foreground_value: 10.
+  background_weight: 1.
+  # filter
+  filter: all
+  fancy_aug: False
+  # whether to load flow/images in ram
+  flow_in_ram: False
+  imgs_in_ram: False
+  # sequence parameters
+  max_frames: 10
+  augment_wo_dis: True
+  equal_poke_val: True
+  subsample_step: 1
+  flow_weights: False
+  n_ref_frames: 10

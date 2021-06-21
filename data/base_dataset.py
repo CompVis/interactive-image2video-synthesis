@@ -764,6 +764,8 @@ class BaseDataset(Dataset, LoggingParent):
             assert len(self.ids_per_seq_len) > 0
             assert len(self.object_weights_per_seq_len) == len(self.ids_per_seq_len)
 
+        return self.datadict["flow_paths"].shape[0] if isinstance(self.datadict["flow_paths"],np.ndarray) else len(self.datadict["flow_paths"])
+
 
     @abstractmethod
     def _set_instance_specific_values(self):
