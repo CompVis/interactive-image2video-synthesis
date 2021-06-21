@@ -6,13 +6,12 @@
 [Björn Ommer](https://hci.iwr.uni-heidelberg.de/Staff/bommer),
 [CVPR 2021](http://cvpr2021.thecvf.com/)<br/>
 
-=======
 This repository contains the code to reproduce the results presented in our paper [Understanding Object Dynamics for Interactive Image-to-Video Synthesis](toso add link) and train new models to enable human users to interact with still images.  
 
 
 ![teaser](images/overview.png "Overview over our model.")
 
-[**Arxiv**](todo add arxiv link once up) | [**Project page**](https://compvis.github.io/interactive-image2video-synthesis/) | [**BibTex**]()
+[**Paper**](https://openaccess.thecvf.com/content/CVPR2021/html/Blattmann_Understanding_Object_Dynamics_for_Interactive_Image-to-Video_Synthesis_CVPR_2021_paper.htmlhttps://openaccess.thecvf.com/content/CVPR2021/html/Blattmann_Understanding_Object_Dynamics_for_Interactive_Image-to-Video_Synthesis_CVPR_2021_paper.html) | [**Project page**](https://compvis.github.io/interactive-image2video-synthesis/) | [**BibTex**]()
 
 **TL;DR** We introduce the novel problem of Interactive Image-to-Video Synthesis where we learn to understand the relations between the distinct body parts of articulated objects from unlabeled video data. Our proposed model allows for synthesis of videos showing natural object dynamics as responses to targeted, local interactions.and, thus, enables human users to interact with still images by poking pixels.
 
