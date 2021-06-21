@@ -1,0 +1,8 @@
+plants_128x128
+plants_64x64
+iper_128x128
+iper_64x64
+h36m_128x128
+h36m_64x64
+taichi_128x128
+taichi_64x64

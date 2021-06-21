@@ -1,0 +1,23 @@
+name: flownet2
+channels:
+  - pytorch
+  - conda-forge
+  - defaults
+dependencies:
+  - cudatoolkit=10.0.130
+  - imagesize=1.2.0
+  - numpy=1.18.1
+  - pillow=7.1.2
+  - pip=20.0.2
+  - python=3.7.7
+  - pytorch=1.2.0
+  - torchvision=0.4.0
+  - tqdm=4.48.0
+  - pip:
+    - coloredlogs==14.0
+    - matplotlib==3.2.1
+    - opencv-python==4.2.0.34
+    - pyyaml==5.3.1
+    - scipy
+    - imageio-ffmpeg
+
