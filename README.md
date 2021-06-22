@@ -1,19 +1,24 @@
 # Interactive Image2Video-Synthesis
 
+Official Pytorch Implementation of our CVPR21 paper [Understanding Object Dynamics for Interactive Image-to-Video Synthesis](https://arxiv.org/abs/2106.11303), where we enable human users to interact with still images.
+
+![teaser](images/teaser.gif )
+
+
+## [**Arxiv**](https://arxiv.org/abs/2106.11303) | [**Project page**](https://compvis.github.io/interactive-image2video-synthesis/) | [**BibTex**](#bibtex)
+
 [Andreas Blattmann](https://www.linkedin.com/in/andreas-blattmann-479038186/?originalSubdomain=de),
 [Timo Milbich](https://timomilbich.github.io/),
 [Michael Dorkenwald](https://mdork.github.io/),
 [Björn Ommer](https://hci.iwr.uni-heidelberg.de/Staff/bommer),
 [CVPR 2021](http://cvpr2021.thecvf.com/)<br/>
 
-This repository contains the code to reproduce the results presented in our paper [Understanding Object Dynamics for Interactive Image-to-Video Synthesis](toso add link) and train new models to enable human users to interact with still images.  
-
-
-![teaser](images/overview.png "Overview over our model.")
-
-[**Paper**](https://openaccess.thecvf.com/content/CVPR2021/html/Blattmann_Understanding_Object_Dynamics_for_Interactive_Image-to-Video_Synthesis_CVPR_2021_paper.htmlhttps://openaccess.thecvf.com/content/CVPR2021/html/Blattmann_Understanding_Object_Dynamics_for_Interactive_Image-to-Video_Synthesis_CVPR_2021_paper.html) | [**Project page**](https://compvis.github.io/interactive-image2video-synthesis/) | [**BibTex**]()
 
 **TL;DR** We introduce the novel problem of Interactive Image-to-Video Synthesis where we learn to understand the relations between the distinct body parts of articulated objects from unlabeled video data. Our proposed model allows for synthesis of videos showing natural object dynamics as responses to targeted, local interactions.and, thus, enables human users to interact with still images by poking pixels.
+
+
+![overview](images/overview.png "Overview over our model.")
+
 
 ## Table of contents ##
 1. [Requirements](#Requirements)
