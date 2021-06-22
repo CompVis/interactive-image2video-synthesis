@@ -5,7 +5,7 @@ Official Pytorch Implementation of our CVPR21 paper [Understanding Object Dynami
 ![teaser](images/teaser.gif )
 
 
-## [**Arxiv**](https://arxiv.org/abs/2106.11303) | [**Project page**](https://compvis.github.io/interactive-image2video-synthesis/) | [**BibTex**](#bibtex)
+## [**Arxiv**](https://arxiv.org/abs/2106.11303) | [**Project page**](https://compvis.github.io/interactive-image2video-synthesis/) | [**BibTeX**](#bibtex)
 
 [Andreas Blattmann](https://www.linkedin.com/in/andreas-blattmann-479038186/?originalSubdomain=de),
 [Timo Milbich](https://timomilbich.github.io/),
