@@ -61,10 +61,10 @@
 
                     <div class="image fit captioned align-center"
                                 style="margin-bottom:0em; box-shadow:0 0">
-                      <a href="paper/paper.pdf">
+                      <a href="https://arxiv.org/pdf/2106.11303.pdf">
                         <img src="paper/paper.png" alt="" style="border:1px solid black"/>
                       </a>
-                        <a href="https://openaccess.thecvf.com/content/CVPR2021/papers/Blattmann_Understanding_Object_Dynamics_for_Interactive_Image-to-Video_Synthesis_CVPR_2021_paper.pdf">Paper</a>
+                        <a href="https://arxiv.org/abs/2106.11303">Arxiv</a>
                       <div class="headerDivider"></div>
                       <a href="paper/paper.bib">BibTeX</a>
                       <div class="headerDivider"></div>
@@ -86,6 +86,20 @@
 
 				</section>
 
+            <section id="onehalf" class="wrapper style2 special">
+					<div class="container">
+						<header class="major">
+							<h2>Video Presentation</h2>
+						</header>
+
+                        <div class="container 75%">
+                            <div class="videocontainer">
+<iframe src="https://www.youtube.com/watch?v=w5agKXRhY-8" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen class="videothing"></iframe>
+</div>
+                         Video Presentation of our work at <a href="http://cvpr2021.thecvf.com/">CVPR2021</a>
+                    </div>
+                        </div>
+                </section>
 
 			<!-- Two -->
 				<section id="two" class="wrapper style2 special">
@@ -103,6 +117,7 @@
                       Left: Our framework for interactive image-to-video synthesis during training. Right: Our proposed hierarchical latent model \(\boldsymbol{\mathcal{F}}\) for synthesizing dynamics, consisting of a hierarchy of individual RNNs \(\mathcal{F}_n\), each of which operates on a different spatial feature level of the UNet defined by the pretrained encoder \(\mathcal{E}_\sigma\) and the decoder \(\mathcal{G}\). Given the initial object state \(\boldsymbol{\sigma}_0 = [\mathcal{E}_\sigma(x_0)^1,...,\mathcal{E}_\sigma(x_0)^N]\), \(\boldsymbol{\mathcal{F}}\) predicts the next state \(\boldsymbol{\hat{\sigma}}_{i+1} = [\hat{\sigma}_{i+1}^1,...,\hat{\sigma}_{i+1}^N]\) based on its current state \(\hat{\sigma}_i\) and the latent interaction \(\phi_i = \mathcal{E}_\phi(p,l)\) at the corresponding time step. The decoder \(\mathcal{G}\) finally visualizes each predicted object state \(\hat{\sigma}_i\) in an image frame \(\hat{x}_i\).
                     </div>
                         </div>
+
                     </div>
                 </section>
 
